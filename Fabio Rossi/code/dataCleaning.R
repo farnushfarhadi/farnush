@@ -6,6 +6,7 @@ library(MASS)
 library(gdata)
 library(reshape)
 library (Rmisc)
+library(preprocessCore)
 ##### DATA LOADING #####
 #setwd ("~/Desktop/internship-ubc/data/txt version")
 setwd ("Fabio Rossi/data/txt version")

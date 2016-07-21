@@ -77,7 +77,7 @@ ss_corHeatmap <- function (table , toWrite)
             col=cols, cexCol=0.7, cexRow=0.55 , margins=c(8,8) , srtCol=45  
             , main = toWrite )
   
-  heatmap.2(cor_matrix )
+  heatmap.2(cor_matrix , col=cols, cexCol=0.7, cexRow=0.55 , margins=c(8,8) , srtCol=45 , scale = NULL)
   
   #heatmap.2(cor_matrix,  symm=T, scale = NULL , trace="none", 
   #         col=cols, cexCol=0.7, cexRow=0.55 , margins=c(8,8) , srtCol=45  
@@ -106,6 +106,17 @@ plotExpressionDist <- function (allSamples , t1 , t2)
   axis(side=1, at=c(0:10 , by = 1))
 }
 
+filterLowExpressedGenes <- function(table  , threshold , percentage)
+{
+  if (percentage == 1)
+  {
+    apply(table[,-c(1,2)], 1, function(x) {all(as.numeric(x)>threshold )}) -> res
+    which (res %>% unname() == FALSE ) -> lowIdx
+    table [ - lowIdx , ] -> table 
+    return (table)
+  }
+}
+
 
 QuantileNormalize <- function (table)
 {
@@ -115,4 +126,14 @@ QuantileNormalize <- function (table)
   normalize.quantiles(table_m , copy = TRUE) -> table_normal
   colnames (table_normal ) <- colnames(table [ , - c(1,2)])
   return (cbind (table[ , c(1,2)] , table_normal))
+}
+
+
+dataQC <- function (table , threshold , percentage , title)
+{
+  logTransform (table) -> table_log
+  filterLowExpressedGenes(table_log , threshold , percentage) -> table_log_filtered 
+  QuantileNormalize (table_log_filtered) -> table_log_filtered_n 
+  ss_corHeatmap (table_log_filtered_n , title)
+  return(table_log_filtered_n)
 }
