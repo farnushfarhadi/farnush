@@ -1,4 +1,4 @@
-library (Rmisc)
+
 method <- function (table , threshold )
 {
   #print (paste ("Analyzing group" , group_number))
@@ -98,8 +98,7 @@ method <- function (table , threshold )
  res95_num [idx]
  
  
- method (EC_damaged_log_filtered , 0.95 ) -> res95_notRep
- res95_notRep_num <- sapply(res95_notRep , function(x) {length (x)}) 
+
  
  method (EC_damaged_log_filtered , 0.90 ) -> res90_notRep
  res90_notRep_num <- sapply(res90_notRep , function(x) {length (x)}) 
@@ -120,6 +119,15 @@ plotTopdf <- function (path , table , cluster_res , title , num)
   dev.off()
 }
 somePDFPath = "~/Desktop/Fabio-summer 2016/code/EC_clustering95notRep.pdf"
+
+
+#################
+#method (EC_damaged_log_filtered , 0.95 ) -> res95_notRep
+load ("../../code/clustering res/method1/90EC_damaged_noRep.RData")
+load("../../code/clustering res/method1/95EC_damaged_noRep.RData")
+res95_notRep_num <- sapply(res95_notRep , function(x) {length (x)}) 
+res95_notRep_num  %>% order() %>% tail (50) -> idx
+res95_notRep_num [idx]
 plotTopdf (somePDFPath ,EC_damaged_log , res95_notRep , "95%" , 100 )
 
 method (FAP_damaged_log_filtered , 0.90 ) -> res90_FAP_noRep
@@ -129,16 +137,7 @@ FAP_res90_notRep_num [idx]
 somePDFPath = "~/Desktop/Fabio-summer 2016/code/FAP_clustering90notRep.pdf"
 plotTopdf (somePDFPath ,FAP_damaged_log , res90_FAP_noRep , "90%" , 50 )
 setwd("~/Desktop/Fabio-summer 2016/code/clustering res/")
-load ("90EC_damaged_noRep.RData")
-load("95EC_damaged_noRep.RData")
 
-library (graphics)
-op <- par(mfrow = c(2,1), mgp = c(2,.8,0), mar = 0.1+c(3,3,3,1))
-n <- 9
-x <- 1:n
-y <- rnorm(n)
-plot(x, y, main = paste("spline[fun](.) through", n, "points"))
-lines(spline(x, y))
-lines(spline(x, y, n = 201), col = 2)
-y <- (x-6)^2
-plot(x, y, main = "spline(.) -- 3 methods")
+## combning clusters?
+
+
