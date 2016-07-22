@@ -171,11 +171,14 @@ setwd("~/Desktop/Fabio-summer 2016/code/clustering res/")
 
 #### EC WT
 method (EC_WT_log_filtered_n , 0.90 ) -> EC_WT_m1_90
+save (EC_WT_m1_90 , file = "../../code/clustering res/method1/EC/EC_WT90.RData")
 EC_WT_m1_90_size <- sapply(EC_WT_m1_90 , function(x) {length (x)}) 
 EC_WT_m1_90_size  %>% order() %>% tail (100) -> idx
 EC_WT_m1_90_size [idx]
 EC_WT_Path = "../../code/clustering res/method1/EC/EC_WT_90.pdf"
 EC_WT_days <- c("D0" , "D2-1" , "D2-2" , "D2-3" , "D3-1" , "D3-2" , "D3-3" , "D4" , "D5" , "D6" , "D7" , "D10-1" , "D10-2" , "D14" )
 plotTopdf (EC_WT_Path ,EC_WT_log_filtered_n , EC_WT_m1_90 , "90%" , 100 ,  EC_WT_days)
-EC_WT_log_filtered_n_avg = data.frame()
-
+EC_WT_log_filtered_n_1 = EC_WT_log_filtered_n[ , c(1,2,3,4,7,10,11,12,13,14,16)]
+EC_WT_Path = "../../code/clustering res/method1/EC/EC_WT_90_replicate1.pdf"
+EC_WT_days1 <- c("D0" , "D2-1" , "D3-1"  , "D4" , "D5" , "D6" , "D7" , "D10-1"  , "D14" )
+plotTopdf (EC_WT_Path ,EC_WT_log_filtered_n_1 , EC_WT_m1_90 , "90%" , 100 ,  EC_WT_days1)
