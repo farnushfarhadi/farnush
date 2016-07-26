@@ -1,3 +1,142 @@
 source("http://bioconductor.org/biocLite.R") 
 biocLite(c("AnnotationDbi", "impute", "GO.db", "preprocessCore")) 
 install.packages("WGCNA")
+library (WGCNA)
+
+workingDir = ".";
+setwd(workingDir);
+options(stringsAsFactors = FALSE )
+
+setwd("../data/saved in R /")
+load (file = "EC_WT.RData")
+load (file = "EC_damaged.RData")
+load (file = "FAP_WT.RData")
+load (file = "FAP_damaged.RData")
+load (file = "inflammatory_WT.RData")
+load (file = "muscleProgenitors_WT.RData")
+load (file = "muscleProgenitors_damaged.RData")
+
+EC_all <- cbind (EC_WT , EC_damaged [ , - c(1,2)])
+filterLowExpressedGenes(logTransform(EC_all) , 0.7 , 1) -> EC_all_log_filtered
+
+#
+sapply(EC_all_log_filtered$tracking_id %>% unique() %>% as.character(), function(x) {which (EC_all_log_filtered$tracking_id == x)} ) -> hh 
+k = c()
+for (i in 1:length(hh))
+{
+  k = c(k , hh[[i]][1])
+}
+# remove dupliated rows
+EC_wt_expr <- EC_all_log_filtered [ k, 3:dim(EC_WT)[2]] # 8711 14
+EC_damaged_expr <- EC_all_log_filtered [ k, - c(1:dim(EC_WT)[2])] # 8711 8
+
+rownames(EC_wt_expr ) <- EC_all_log_filtered$tracking_id %>% as.character() %>% unique()
+colnames(EC_wt_expr) <- EC_all_log_filtered %>% colnames(EC_all_log_filtered) [3:dim(EC_WT)[2]]
+rownames(EC_damaged_expr ) <- EC_all_log_filtered$tracking_id %>% as.character() %>% unique()
+colnames(EC_damaged_expr) <- EC_all_log_filtered %>% colnames(EC_all_log_filtered) [( - c(1:dim(EC_WT)[2]))]
+
+EC_wt_expr <- as.data.frame(t(EC_wt_expr) )
+EC_damaged_expr <- as.data.frame(t(EC_damaged_expr))
+
+
+### soft thresholding 
+
+powers = c(c(1:10), seq(from = 12, to=30, by=2))
+# Call the network topology analysis function
+
+sft_EC_wt = pickSoftThreshold(EC_wt_expr, powerVector = powers, verbose = 5)
+sft_EC_damaged = pickSoftThreshold(EC_damaged_expr, powerVector = powers, verbose = 5)
+
+
+
+plot_networkTopology (sft_EC_wt) # 14
+plot_networkTopology (sft_EC_damaged) # 22
+
+net_EC_wt = blockwiseModules(EC_wt_expr, power = 14, TOMType = "unsigned", minModuleSize = 30, reassignThreshold = 0, mergeCutHeight = 0.25,
+                       numericLabels = TRUE, pamRespectsDendro = FALSE, saveTOMs = TRUE, saveTOMFileBase = "femaleMouseTOM", verbose = 3)
+
+net_EC_damaged = blockwiseModules(EC_damaged_expr, power = 22, TOMType = "unsigned", minModuleSize = 30, reassignThreshold = 0, mergeCutHeight = 0.25,
+                             numericLabels = TRUE, pamRespectsDendro = FALSE, saveTOMs = TRUE, saveTOMFileBase = "femaleMouseTOM", verbose = 3)
+
+clusteringDendogramGenes(net_EC_wt)
+clusteringDendogramGenes(net_EC_damaged)
+
+saveIt (net_EC_wt , "../../WGCNA/EC_wt_network.RData")
+saveIt (net_EC_damaged , "../../WGCNA/EC_damaged_network.RData")
+
+
+##### loading the networks and preparing data for module preservation
+nSets = 2;
+multiExpr = list();
+multiExpr[[1]] = list(data = EC_wt_expr);
+multiExpr[[2]] = list(data = EC_damaged_expr);
+setLabels = c("EC_WT", "ECC_CCR2_KO");
+names(multiExpr) = setLabels
+
+x = load("../../WGCNA/EC_wt_network.RData")
+color_EC_wt <- moduleColors
+x = load("../../WGCNA/EC_damaged_network.RData")
+color_EC_damaged <- moduleColors
+colorList = list(color_EC_wt, color_EC_damaged);
+names(colorList) = setLabels;
+
+## calculate module preservation statistics
+system.time( {
+  mp_EC = modulePreservation(multiExpr, colorList,referenceNetworks = c(1:2),loadPermutedStatistics = FALSE,nPermutations = 200,verbose = 3)
+});
+
+
+setwd("../../WGCNA/tutorial")
+sampleTree = hclust(dist (t(EC_WT[-c(1,2)]) ) , method = "average")
+# sampleTree = hclust(dist (QuantileNormalize(logTransform(t(EC_WT[-c(1,2)]))) ) , method = "average")
+# sampleTree = hclust(dist (logTransform(t(EC_WT[-c(1,2)]))) , method = "average")
+sizeGrWindow(12, 9)
+par (cex = 0.6)
+par (mar = c(0,4,2,0))
+plot (sampleTree , main = "sample clustering to detect outlier" , sub="" , xlab = "" , cex.lab = 1.5 , cex.axis=1.5 , cex.main = 2)
+plot (sampleTree , main = "sample clustering to detect outlier" )
+
+clusteringDendogramGenes <- function(net)
+{
+  # open a graphics window
+  sizeGrWindow(12, 9)
+  # Convert labels to colors for plotting
+  mergedColors = labels2colors(net$colors)
+  # Plot the dendrogram and the module colors underneath
+  plotDendroAndColors(net$dendrograms[[1]], mergedColors[net$blockGenes[[1]]],
+                      "Module colors",
+                      dendroLabels = FALSE, hang = 0.03,
+                      addGuide = TRUE, guideHang = 0.05)
+}
+
+# changed h in abline
+plot_networkTopology <- function (sft)
+{
+  # Plot the results:
+  sizeGrWindow(9, 5)
+  par(mfrow = c(1,2));
+  cex1 = 0.9;
+  # Scale-free topology fit index as a function of the soft-thresholding power
+  plot(sft$fitIndices[,1], -sign(sft$fitIndices[,3])*sft$fitIndices[,2],
+       xlab="Soft Threshold (power)",ylab="Scale Free Topology Model Fit,signed R^2",type="n",
+       main = paste("Scale independence"));
+  text(sft$fitIndices[,1], -sign(sft$fitIndices[,3])*sft$fitIndices[,2],
+       labels=powers,cex=cex1,col="red");
+  # this line corresponds to using an R^2 cut-off of h
+  abline(h=0.85,col="red")
+  # Mean connectivity as a function of the soft-thresholding power
+  plot(sft$fitIndices[,1], sft$fitIndices[,5],
+       xlab="Soft Threshold (power)",ylab="Mean Connectivity", type="n",
+       main = paste("Mean connectivity"))
+  text(sft$fitIndices[,1], sft$fitIndices[,5], labels=powers, cex=cex1,col="red")
+}
+
+saveIt <- function(net , file)
+{
+  moduleLabels = net$colors
+  moduleColors = labels2colors(net$colors)
+  MEs = net$MEs;
+  geneTree = net$dendrograms[[1]];
+  save(MEs, moduleLabels, moduleColors, geneTree, 
+       file = file)
+}
