@@ -18,7 +18,8 @@ corAverage <- function (table  , genes , z)
 
   cor (t(as.matrix(table[Reduce(union , c_idx) , -c(1,2)]) )) %>% round(4) -> cor_scores
   avg_cor <- (cor_scores[lower.tri(cor_scores)] %>% sum() ) / (n * (n-1) )
-  return (avg_cor)
+  #return (avg_cor)
+  return (cor_scores)
 }
 
 doCorAverageForClusters <- function (clusters , table , z)

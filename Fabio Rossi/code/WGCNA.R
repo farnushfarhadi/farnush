@@ -35,6 +35,8 @@ colnames(EC_wt_expr) <- EC_all_log_filtered %>% colnames(EC_all_log_filtered) [3
 rownames(EC_damaged_expr ) <- EC_all_log_filtered$tracking_id %>% as.character() %>% unique()
 colnames(EC_damaged_expr) <- EC_all_log_filtered %>% colnames(EC_all_log_filtered) [( - c(1:dim(EC_WT)[2]))]
 
+
+
 EC_wt_expr <- as.data.frame(t(EC_wt_expr) )
 EC_damaged_expr <- as.data.frame(t(EC_damaged_expr))
 
@@ -81,10 +83,32 @@ colorList = list(color_EC_wt, color_EC_damaged);
 names(colorList) = setLabels;
 
 ## calculate module preservation statistics
+# 82 min 
 system.time( {
   mp_EC = modulePreservation(multiExpr, colorList,referenceNetworks = c(1:2),loadPermutedStatistics = FALSE,nPermutations = 200,verbose = 3)
 });
 
+
+magenta_genes <- read.table("../../WGCNA/magenta_genes_EC.txt" , header = FALSE) %>% unlist() %>% unname()
+days = c("D0" , "D1" , "D2"  , "D3" , "D5" , "D6" , "D7" , "D10" )
+plotCluster(EC_damaged_log_filtered , magenta_genes, "preserved in EC CCR2 KO",days )
+plotCluster(EC_WT_log_filtered_n_1 ,magenta_genes ,"preserved in EC WT",EC_WT_days1  )
+# 
+corAverage ( filterLowExpressedGenes( logTransform(EC_WT), 0.7 , 1), magenta_genes , 0) -> s
+s[lower.tri(s, diag = FALSE) ]-> s
+par (mfrow = c(1,1))
+hist (s , breaks = 100 , col = "blue" , main = "Pearson cor - most preserved module in EC WT")
+#
+
+corAverage ( filterLowExpressedGenes( logTransform(EC_damaged), 0.7 , 1), magenta_genes , 0) -> s
+s[lower.tri(s, diag = FALSE) ]-> s
+par (mfrow = c(1,1))
+hist (s , breaks = 100 , col = "blue" , main = "Pearson cor - most preserved module in EC CCR2 KO")
+
+gy_genes <- read.table("../../WGCNA/gy_genes_EC.txt" , header = FALSE) %>% unlist() %>% unname()
+days = c("D0" , "D1" , "D2"  , "D3" , "D5" , "D6" , "D7" , "D10" )
+plotCluster(EC_damaged_log_filtered , gy_genes, "preserved in EC CCR2 KO",days )
+plotCluster(EC_WT_log_filtered_n_1 ,gy_genes ,"preserved in EC WT",EC_WT_days1  )
 
 setwd("../../WGCNA/tutorial")
 sampleTree = hclust(dist (t(EC_WT[-c(1,2)]) ) , method = "average")
