@@ -195,3 +195,16 @@ EC_WT_log_filtered_n_1 = EC_WT_log_filtered_n[ , c(1,2,3,4,7,10,11,12,13,14,16)]
 EC_WT_Path = "../../code/clustering res/method1/EC/EC_WT_80_replicate1.pdf"
 EC_WT_days1 <- c("D0" , "D2-1" , "D3-1"  , "D4" , "D5" , "D6" , "D7" , "D10-1"  , "D14" )
 plotTopdf (EC_WT_Path ,EC_WT_log_filtered_n_1 , EC_WT_m1_80 , "80%" , 100 ,  EC_WT_days1)
+
+
+### FAP 
+method (FAP_WT_log_filtered_n , 0.80 ) -> FAP_WT_m1_80
+method (FAP_damaged_log_filtered_n , 0.80 ) -> FAP_damaged_m1_80
+
+
+### muscle 
+method (muscleProgenitors_WT_log_filtered_n , 0.80 ) -> muscle_WT_m1_80
+method (muscleProgenitors_damaged_log_filtered_n , 0.80 ) -> muscle_damaged_m1_80
+
+
+## inflammatory
