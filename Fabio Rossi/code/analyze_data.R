@@ -106,7 +106,10 @@ cbind (EC_WT[, c(1,2)] , allSamples) -> allSamplestoHeat
 logTransform(allSamplestoHeat , 3) -> allSamplestoHeat_log
 filterLowExpressedGenes(allSamplestoHeat , 0.7 , 1) -> allSamplestoHeat_filtered # 2263 15 genes
 QuantileNormalize (allSamplestoHeat_filtered) -> allSamplestoHeat_filtered_n 
-allSamples_names = c(EC_WT_days,EC_damaged_days,FAP_WT_days,FAP_damaged_days,inflammatory_WT_days,muscleProgenitors_WT_days,muscleProgenitors_damaged_days)
+allSamples_names = c(paste("EC_WT",EC_WT_days,sep="-"),paste("EC_KO",EC_damaged_days,sep="-"),
+                     paste("FAP_WT",FAP_WT_days,"-"),paste("FAP_WT",FAP_damaged_days,"-"),
+                     paste("ifml_WT",inflammatory_WT_days,"-"),
+                     paste("mus_WT",muscleProgenitors_WT_days,"-"),paste("mus_KO",muscleProgenitors_damaged_days,"-"))
 ss_corHeatmap (allSamplestoHeat_filtered_n , "all samples-quantile normalized" ,allSamples_names,3)
 
 

@@ -72,13 +72,13 @@ ss_corHeatmap <- function (table , toWrite , names, idx)
   cols<-c(rev(brewer.pal(9,"YlOrRd")), "#FFFFFF")
   #cols<-colorRampPalette(brewer.pal(9,"Greens"))
   #cols<-colorRampPalette(brewer.pal(9,"Greens"))
-  par(cex.main=0.6)
+  par(cex.main=0.8)
   # heatmap.2(cor_matrix, Rowv=NA, Colv=NA, symm=T, scale = NULL , trace="none", dendrogram="none", 
   #           col=cols, cexCol=0.7, cexRow=0.55 , margins=c(8,8) , srtCol=45  
   #           , main = toWrite )
   heatmap.2(cor_matrix,  symm=T, scale = NULL , trace="none",  
-            col=cols, cexCol=0.7, cexRow=0.7 , margins=c(6,6) , srtCol=45  
-            , main = toWrite )
+            col=cols, cexCol=0.6, cexRow=0.5 , margins=c(5,5) , srtCol=90 , 
+            main = toWrite )
   #heatmap.2(cor_matrix , col=cols, cexCol=0.7, cexRow=0.55 , margins=c(8,8) , srtCol=45 , scale = NULL)
   
   #heatmap.2(cor_matrix,  symm=T, scale = NULL , trace="none", 
