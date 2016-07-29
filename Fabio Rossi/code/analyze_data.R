@@ -103,10 +103,11 @@ QuantileNormalize (FAP_damaged_noRep_log_filtered) -> l
 
 #heatmap of all samples 
 cbind (EC_WT[, c(1,2)] , allSamples) -> allSamplestoHeat
-logTransform(allSamplestoHeat) -> allSamplestoHeat_log
+logTransform(allSamplestoHeat , 3) -> allSamplestoHeat_log
 filterLowExpressedGenes(allSamplestoHeat , 0.7 , 1) -> allSamplestoHeat_filtered # 2263 15 genes
 QuantileNormalize (allSamplestoHeat_filtered) -> allSamplestoHeat_filtered_n 
-ss_corHeatmap (allSamplestoHeat_filtered_n , "all samples-quantile normalized")
+allSamples_names = c(EC_WT_days,EC_damaged_days,FAP_WT_days,FAP_damaged_days,inflammatory_WT_days,muscleProgenitors_WT_days,muscleProgenitors_damaged_days)
+ss_corHeatmap (allSamplestoHeat_filtered_n , "all samples-quantile normalized" ,allSamples_names,3)
 
 
 logTransform (muscleProgenitors_damaged_noRep) -> muscleProgenitors_damaged_noRep_log
