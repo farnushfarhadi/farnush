@@ -82,13 +82,20 @@ muscleProgenitors_damaged_noRep[ , -4] -> muscleProgenitors_damaged_noRep
 # hist (log (FAP_damaged_normal[,3] + 1 ) , col = "green")
 
 # - Question: preprocessing  data
-dataQC (EC_WT , 0.7 , 1 , "EC WT-quantile normalized") -> EC_WT_log_filtered_n # 9396 16 genes
-dataQC (EC_damaged , 0.7 , 1 , "EC KO-quantile normalized") -> EC_damaged_log_filtered_n # 9025 10 genes
-dataQC (FAP_WT , 0.7 , 1 , "FAP WT-quantile normalized") -> FAP_WT_log_filtered_n # 8909 17 genes
-dataQC (FAP_damaged , 0.7 , 1 , "FAP KO-quantile normalized") -> FAP_damaged_log_filtered_n # 8341 10 genes
-dataQC (muscleProgenitors_WT , 0.7 , 1 , "muscleProgenitors WT-quantile normalized") -> muscleProgenitors_WT_log_filtered_n # 9014 8 genes
-dataQC (muscleProgenitors_damaged , 0.7 , 1 , "muscleProgenitors KO-quantile normalized") -> muscleProgenitors_damaged_log_filtered_n # 9535 8 genes
-dataQC (inflammatory_WT , 0.7 , 1 , "inflammatory WT-quantile normalized") -> inflammatory_WT_log_filtered_n # 2263 15 genes
+EC_WT_days <- c("D0" , "D2-1" , "D2-2" , "D2-3" , "D3-1" , "D3-2" , "D3-3" , "D4" , "D5" , "D6" , "D7" , "D10-1" , "D10-2" , "D14" )
+dataQC (EC_WT , 0.7 , 1 , "EC WT-quantile normalized" , EC_WT_days , 3) -> EC_WT_log_filtered_n # 9396 16 genes
+EC_damaged_days <- c("D0" , "D1" , "D2" , "D3" , "D5" , "D6" , "D7" , "D10")
+dataQC (EC_damaged , 0.7 , 1 , "EC KO-quantile normalized" , EC_damaged_days , 3) -> EC_damaged_log_filtered_n # 9025 10 genes
+FAP_WT_days <- c("D0" , "D1" , "D2-1" , "D2-2" , "D2-3" , "D3-1" , "D3-2" , "D3-3" , "D4-1" , "D4-2" , "D5" , "D6" , "D7" , "D10" , "D14" )
+dataQC (FAP_WT , 0.7 , 1 , "FAP WT-quantile normalized" , FAP_WT_days , 3) -> FAP_WT_log_filtered_n # 8909 17 genes
+FAP_damaged_days <- c("D0" , "D1" , "D2" , "D3-1" , "D3-2" , "D4" , "D5" , "D6"  , "D10")
+dataQC (FAP_damaged , 0.7 , 1 , "FAP KO-quantile normalized" , FAP_damaged_days ,3) -> FAP_damaged_log_filtered_n # 8341 10 genes
+muscleProgenitors_WT_days <- c( "D1" , "D2" , "D3-1" , "D3-2" , "D5" ,  "D7"  , "D10")
+dataQC (muscleProgenitors_WT , 0.7 , 1 , "muscleProgenitors WT-quantile normalized", muscleProgenitors_WT_days,2) -> muscleProgenitors_WT_log_filtered_n # 9014 8 genes
+muscleProgenitors_damaged_days <- c( "D0" , "D3-1" , "D3-2" ,"D4" , "D5" ,"D6"  , "D10")
+dataQC (muscleProgenitors_damaged , 0.7 , 1 , "muscleProgenitors KO-quantile normalized" ,muscleProgenitors_damaged_days, 2) -> muscleProgenitors_damaged_log_filtered_n # 9535 8 genes
+inflammatory_WT_days <- c( "D1-1", "D1-2" ,"D2-1" , "D2-2" , "D2-3" , "D3-1" , "D3-2" , "D3-3" , "D4"  ,"D5" ,"D6","D7-1" ,"D7-2" , "D10")
+dataQC (inflammatory_WT , 0.7 , 1 , "inflammatory WT-quantile normalized", inflammatory_WT_days,2) -> inflammatory_WT_log_filtered_n # 2263 15 genes
 
 logTransform (FAP_damaged_noRep) -> FAP_damaged_noRep_log
 filterLowExpressedGenes(FAP_damaged_noRep_log , 0.7 , 1) -> FAP_damaged_noRep_log_filtered # 8394 genes

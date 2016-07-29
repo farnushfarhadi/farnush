@@ -1,12 +1,12 @@
 ### standardizing
 
-logTransform_standardizeMyTable <- function(table)
+logTransform_standardizeMyTable <- function(table , idx)
 {
   
   #table <- failHandler(table)
   names <- colnames(table)
   
-  t<- table [,3:dim(table)[2]]
+  t<- table [,idx:dim(table)[2]]
   r = dim(t)[1];
   c = dim(t)[2];
   t %>% as.matrix() -> p
@@ -20,24 +20,24 @@ logTransform_standardizeMyTable <- function(table)
   {
     t[,i] <-  (t[,i] - t.means[i]) / t.stdevs[i]
   }
-  cbind (table[,1:2] , t) -> tableFinal
+  cbind (table[,1:(idx-1 )] , t) -> tableFinal
   colnames(tableFinal) <- names
   return(tableFinal)
 }
 
-logTransform <- function(table)
+logTransform <- function(table , idx)
 {
   #table <- failHandler(table)
   names <- colnames(table)
   
-  t<- table [,3:dim(table)[2]]
+  t<- table [,idx:dim(table)[2]]
   r = dim(t)[1];
   c = dim(t)[2];
   t %>% as.matrix() -> p
   p %>% as.numeric() -> p1
   matrix(p1 , nrow = r , ncol = c) -> t
   log (t + 1) -> t 
-  cbind (table[,1:2] , t) -> tableFinal
+  cbind (table[,1:(idx-1)] , t) -> tableFinal
   colnames(tableFinal) <- names
   return(tableFinal)
 }
@@ -45,7 +45,7 @@ failHandler <- function (table)
 {
   names <- colnames(table)
   
-  t<- table [, 3:dim(table)[2]]
+  t<- table [, idx:dim(table)[2]]
   as.matrix(t) -> t
   which (t == "FAIL") -> idx
   for (i in 1:length(idx))
@@ -59,25 +59,27 @@ failHandler <- function (table)
       t[r ,p+1] <- "0"
     }
   }
-  cbind (table[,1:2] , t) -> tableFinal
+  cbind (table[,1:(idx-1)] , t) -> tableFinal
   colnames(tableFinal) <- names
   return (tableFinal)
 }
 
-ss_corHeatmap <- function (table , toWrite)
+ss_corHeatmap <- function (table , toWrite , names, idx)
 {
-  cor_matrix <- cor (table [ , 3:dim(table)[2]] , table [ , 3:dim(table)[2]])
-  colnames(cor_matrix) = rownames(cor_matrix) = colnames(table)[3:length(colnames(table))]
+  cor_matrix <- cor (table [ , idx:dim(table)[2]] , table [ , idx:dim(table)[2]])
+  colnames(cor_matrix) = rownames(cor_matrix) = names
   diag(cor_matrix) <- NA
   cols<-c(rev(brewer.pal(9,"YlOrRd")), "#FFFFFF")
   #cols<-colorRampPalette(brewer.pal(9,"Greens"))
   #cols<-colorRampPalette(brewer.pal(9,"Greens"))
-  par(cex.main=0.8)
-  heatmap.2(cor_matrix, Rowv=NA, Colv=NA, symm=T, scale = NULL , trace="none", dendrogram="none", 
-            col=cols, cexCol=0.7, cexRow=0.55 , margins=c(8,8) , srtCol=45  
+  par(cex.main=0.6)
+  # heatmap.2(cor_matrix, Rowv=NA, Colv=NA, symm=T, scale = NULL , trace="none", dendrogram="none", 
+  #           col=cols, cexCol=0.7, cexRow=0.55 , margins=c(8,8) , srtCol=45  
+  #           , main = toWrite )
+  heatmap.2(cor_matrix,  symm=T, scale = NULL , trace="none",  
+            col=cols, cexCol=0.7, cexRow=0.7 , margins=c(6,6) , srtCol=45  
             , main = toWrite )
-  
-  heatmap.2(cor_matrix , col=cols, cexCol=0.7, cexRow=0.55 , margins=c(8,8) , srtCol=45 , scale = NULL)
+  #heatmap.2(cor_matrix , col=cols, cexCol=0.7, cexRow=0.55 , margins=c(8,8) , srtCol=45 , scale = NULL)
   
   #heatmap.2(cor_matrix,  symm=T, scale = NULL , trace="none", 
   #         col=cols, cexCol=0.7, cexRow=0.55 , margins=c(8,8) , srtCol=45  
@@ -129,11 +131,12 @@ QuantileNormalize <- function (table)
 }
 
 
-dataQC <- function (table , threshold , percentage , title)
+dataQC <- function (table , threshold , percentage , title , names , idx)
 {
-  logTransform (table) -> table_log
+  logTransform (table , idx) -> table_log
   filterLowExpressedGenes(table_log , threshold , percentage) -> table_log_filtered 
   QuantileNormalize (table_log_filtered) -> table_log_filtered_n 
-  ss_corHeatmap (table_log_filtered_n , title)
+  ss_corHeatmap (table_log_filtered_n , title , names , idx)
   return(table_log_filtered_n)
 }
+
