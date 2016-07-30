@@ -79,6 +79,10 @@ ss_corHeatmap <- function (table , toWrite , names, idx)
   heatmap.2(cor_matrix,  symm=T, scale = NULL , trace="none",  
             col=cols, cexCol=0.6, cexRow=0.5 , margins=c(5,5) , srtCol=90 , 
             main = toWrite )
+  table[1:200 , - c(1,2)] %>% as.matrix() -> toHeat
+  heatmap.2(t(l), scale = NULL , trace="none",  
+            col=cols, cexCol=0.6, cexRow=0.5 , margins=c(5,5) , srtCol=90 , 
+            main = toWrite )
   #heatmap.2(cor_matrix , col=cols, cexCol=0.7, cexRow=0.55 , margins=c(8,8) , srtCol=45 , scale = NULL)
   
   #heatmap.2(cor_matrix,  symm=T, scale = NULL , trace="none", 

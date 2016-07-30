@@ -199,12 +199,17 @@ plotTopdf (EC_WT_Path ,EC_WT_log_filtered_n_1 , EC_WT_m1_80 , "80%" , 100 ,  EC_
 
 ### FAP 
 method (FAP_WT_log_filtered_n , 0.80 ) -> FAP_WT_m1_80
+save (FAP_WT_m1_80 , file = "../../code/clustering res/method1/FAP/FAP_WT80.RData")
 method (FAP_damaged_log_filtered_n , 0.80 ) -> FAP_damaged_m1_80
-
+save (FAP_damaged_m1_80 , file = "../../code/clustering res/method1/FAP/FAP_KO80.RData")
 
 ### muscle 
 method (muscleProgenitors_WT_log_filtered_n , 0.80 ) -> muscle_WT_m1_80
+save (muscle_WT_m1_80 , file = "../../code/clustering res/method1/muscle/muscle_WT80.RData")
 method (muscleProgenitors_damaged_log_filtered_n , 0.80 ) -> muscle_damaged_m1_80
+save (muscle_damaged_m1_80 , file = "../../code/clustering res/method1/muscle/muscle_KO80.RData")
 
 
 ## inflammatory
+method (inflammatory_WT_log_filtered_n , 0.80 ) -> inflammatory_WT_m1_80
+save (inflammatory_WT_m1_80 , file = "../../code/clustering res/method1/inflammatory/inflammatory_KO80.RData")
