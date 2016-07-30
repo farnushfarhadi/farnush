@@ -104,13 +104,22 @@ QuantileNormalize (FAP_damaged_noRep_log_filtered) -> l
 #heatmap of all samples 
 cbind (EC_WT[, c(1,2)] , allSamples) -> allSamplestoHeat
 logTransform(allSamplestoHeat , 3) -> allSamplestoHeat_log
-filterLowExpressedGenes(allSamplestoHeat , 0.7 , 1) -> allSamplestoHeat_filtered # 2263 15 genes
+filterLowExpressedGenes(allSamplestoHeat_log , 0.7 , 1) -> allSamplestoHeat_filtered # 2263 15 genes
 QuantileNormalize (allSamplestoHeat_filtered) -> allSamplestoHeat_filtered_n 
 allSamples_names = c(paste("EC_WT",EC_WT_days),paste("EC_KO",EC_damaged_days),
                      paste("FAP_WT",FAP_WT_days),paste("FAP_WT",FAP_damaged_days),
                      paste("ifml_WT",inflammatory_WT_days),
                      paste("mus_WT",muscleProgenitors_WT_days),paste("mus_KO",muscleProgenitors_damaged_days))
 ss_corHeatmap (allSamplestoHeat_filtered_n , "all samples-quantile normalized" ,allSamples_names,3)
+
+sample <- allSamplestoHeat_filtered_n[, - c(1,2)]
+colnames(sample) <- allSamples_names
+cols<-c(rev(brewer.pal(9,"YlOrRd")), "#FFFFFF")
+par(cex.main=0.8)
+heatmap.2(sample%>% as.matrix() %>% as.numeric() %>% matrix(nrow= dim(sample)[1] , ncol = dim(sample)[2] ),  scale = NULL , trace="none",  
+          col=cols, cexCol=0.6, cexRow=0.5 , margins=c(5,5) , srtCol=90 , Colv = TRUE , Rowv = FALSE,
+          main = "genes - all samples" )
+
 
 
 logTransform (muscleProgenitors_damaged_noRep) -> muscleProgenitors_damaged_noRep_log
