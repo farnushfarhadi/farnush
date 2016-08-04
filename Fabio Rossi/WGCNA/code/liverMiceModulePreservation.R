@@ -27,7 +27,8 @@ colnames(datExprFemale) = datSummary$substanceBXH
 # This module assignment was obtained by Ghazalpour et al
 colorsFemale = dat0$module
 
-file = bzfile("data/LiverMaleFromLiverFemale3600.csv.bz2");
+setwd("~/Documents/Farnush github/Fabio Rossi/WGCNA/data/")
+file = bzfile("LiverMaleFromLiverFemale3600.csv.bz2");
 data = read.csv(file, header = TRUE);
 datExprMale = t(data[, substring(colnames(data), 1, 3)=="F2_"]);
 colnames(datExprMale) = data$substanceBXH
@@ -50,12 +51,12 @@ system.time( {
 } );
 
 # Save the results
-save(mp, file = "code/modulePreservation.RData");
-load (file = "code/modulePreservation.RData")
+save(mp, file = "../code/modulePreservation.RData");
+load (file = "../code/modulePreservation.RData")
 
 ### show module preservation plots
-ref = 1
-test = 2
+ref = 2
+test = 1
 statsObs = cbind(mp$quality$observed[[ref]][[test]][, -1], mp$preservation$observed[[ref]][[test]][, -1])
 statsZ = cbind(mp$quality$Z[[ref]][[test]][, -1], mp$preservation$Z[[ref]][[test]][, -1]);
 # Compare preservation to quality:
@@ -105,3 +106,4 @@ for (p in 1:2)
 }
 # If plotting into a file, close it
 dev.off();
+

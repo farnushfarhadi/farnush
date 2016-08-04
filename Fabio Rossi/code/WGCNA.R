@@ -16,78 +16,102 @@ load (file = "inflammatory_WT.RData")
 load (file = "muscleProgenitors_WT.RData")
 load (file = "muscleProgenitors_damaged.RData")
 
-EC_all <- cbind (EC_WT , EC_damaged [ , - c(1,2)])
-filterLowExpressedGenes(logTransform(EC_all) , 0.7 , 1) -> EC_all_log_filtered
-
-#
-sapply(EC_all_log_filtered$tracking_id %>% unique() %>% as.character(), function(x) {which (EC_all_log_filtered$tracking_id == x)} ) -> hh 
-k = c()
-for (i in 1:length(hh))
+#EC_all <- cbind (EC_WT , EC_damaged [ , - c(1,2)])
+prepareDataWGCNA <- function (wt , ko , idx)
 {
-  k = c(k , hh[[i]][1])
+  all <- cbind (wt , ko [ , - c(1,2)])
+  filterLowExpressedGenes(logTransform(all) , 0.7 , 1) -> all_log_filtered
+  
+  #
+  sapply(all_log_filtered$tracking_id %>% unique() %>% as.character(), function(x) {which (all_log_filtered$tracking_id == x)} ) -> hh 
+  k = c()
+  for (i in 1:length(hh))
+  {
+    k = c(k , hh[[i]][1])
+  }
+  # remove dupliated rows
+  wt_expr <- all_log_filtered [ k, idx:dim(wt)[2]] # 8711 14
+  damaged_expr <- all_log_filtered [ k, - c(1:dim(wt)[2])] # 8711 8
+  
+  rownames(wt_expr ) <- all_log_filtered$tracking_id %>% as.character() %>% unique()
+  colnames(wt_expr) <- colnames(all_log_filtered) [idx:dim(wt)[2]]
+  rownames(damaged_expr ) <- all_log_filtered$tracking_id %>% as.character() %>% unique()
+  colnames(damaged_expr) <- colnames(all_log_filtered) [( - c(1:dim(wt)[2]))]
+  
+  
+  
+  wt_expr <- as.data.frame(t(wt_expr) )
+  damaged_expr <- as.data.frame(t(damaged_expr))
+  
+  return (list (wt_expr , damaged_expr))
+  
 }
-# remove dupliated rows
-EC_wt_expr <- EC_all_log_filtered [ k, 3:dim(EC_WT)[2]] # 8711 14
-EC_damaged_expr <- EC_all_log_filtered [ k, - c(1:dim(EC_WT)[2])] # 8711 8
-
-rownames(EC_wt_expr ) <- EC_all_log_filtered$tracking_id %>% as.character() %>% unique()
-colnames(EC_wt_expr) <- EC_all_log_filtered %>% colnames(EC_all_log_filtered) [3:dim(EC_WT)[2]]
-rownames(EC_damaged_expr ) <- EC_all_log_filtered$tracking_id %>% as.character() %>% unique()
-colnames(EC_damaged_expr) <- EC_all_log_filtered %>% colnames(EC_all_log_filtered) [( - c(1:dim(EC_WT)[2]))]
-
-
-
-EC_wt_expr <- as.data.frame(t(EC_wt_expr) )
-EC_damaged_expr <- as.data.frame(t(EC_damaged_expr))
-
 
 ### soft thresholding 
+#datExprAll <- prepareDataWGCNA(EC_WT , EC_damaged , 3) # 8711
+datExprAll <- prepareDataWGCNA(FAP_WT , FAP_damaged , 3) # 7985
+
+wt_expr <- datExprAll[[1]]
+damaged_expr <- datExprAll[[2]]
 
 powers = c(c(1:10), seq(from = 12, to=30, by=2))
 # Call the network topology analysis function
 
-sft_EC_wt = pickSoftThreshold(EC_wt_expr, powerVector = powers, verbose = 5)
-sft_EC_damaged = pickSoftThreshold(EC_damaged_expr, powerVector = powers, verbose = 5)
+sft_wt = pickSoftThreshold(wt_expr, powerVector = powers, verbose = 5)
+sft_damaged = pickSoftThreshold(damaged_expr, powerVector = powers, verbose = 5)
 
+save (sft_wt ,file= "../../WGCNA/moulePreservation/FAP/sft_FAP_wt.RData")
+save (sft_damaged , file =  "../../WGCNA/moulePreservation/FAP/sft_FAP_ko.RData")
 
+load(file = "../../WGCNA/moulePreservation/FAP/sft_FAP_wt.RData")
+load(file = "../../WGCNA/moulePreservation/FAP/sft_FAP_ko.RData")
 
-plot_networkTopology (sft_EC_wt) # 14
-plot_networkTopology (sft_EC_damaged) # 22
+#FAP 26 - EC 14
+plot_networkTopology (sft_wt)
+#FAP 24 - EC 22
+plot_networkTopology (sft_damaged) 
 
-net_EC_wt = blockwiseModules(EC_wt_expr, power = 14, TOMType = "unsigned", minModuleSize = 30, reassignThreshold = 0, mergeCutHeight = 0.25,
+net_wt = blockwiseModules(wt_expr, power = 26, TOMType = "unsigned", minModuleSize = 30, reassignThreshold = 0, mergeCutHeight = 0.25,
                        numericLabels = TRUE, pamRespectsDendro = FALSE, saveTOMs = TRUE, saveTOMFileBase = "femaleMouseTOM", verbose = 3)
 
-net_EC_damaged = blockwiseModules(EC_damaged_expr, power = 22, TOMType = "unsigned", minModuleSize = 30, reassignThreshold = 0, mergeCutHeight = 0.25,
+net_damaged = blockwiseModules(damaged_expr, power = 24, TOMType = "unsigned", minModuleSize = 30, reassignThreshold = 0, mergeCutHeight = 0.25,
                              numericLabels = TRUE, pamRespectsDendro = FALSE, saveTOMs = TRUE, saveTOMFileBase = "femaleMouseTOM", verbose = 3)
 
-clusteringDendogramGenes(net_EC_wt)
-clusteringDendogramGenes(net_EC_damaged)
+save (net_wt ,file= "../../WGCNA/moulePreservation/FAP/net_FAP_wt.RData")
+save (net_damaged , file =  "../../WGCNA/moulePreservation/FAP/net_FAP_ko.RData")
 
-saveIt (net_EC_wt , "../../WGCNA/EC_wt_network.RData")
-saveIt (net_EC_damaged , "../../WGCNA/EC_damaged_network.RData")
+load(file = "../../WGCNA/moulePreservation/FAP/net_FAP_wt.RData")
+load(file = "../../WGCNA/moulePreservation/FAP/net_FAP_ko.RData")
+
+clusteringDendogramGenes(net_wt)
+clusteringDendogramGenes(net_damaged)
+
+saveIt (net_wt , "../../WGCNA/moulePreservation/FAP/FAP_wt_network.RData")
+saveIt (net_damaged , "../../WGCNA/moulePreservation/FAP/FAP_damaged_network.RData")
 
 
 ##### loading the networks and preparing data for module preservation
 nSets = 2;
 multiExpr = list();
-multiExpr[[1]] = list(data = EC_wt_expr);
-multiExpr[[2]] = list(data = EC_damaged_expr);
-setLabels = c("EC_WT", "ECC_CCR2_KO");
+multiExpr[[1]] = list(data = wt_expr);
+multiExpr[[2]] = list(data = damaged_expr);
+setLabels = c("WT", "CCR2_KO");
 names(multiExpr) = setLabels
 
-x = load("../../WGCNA/EC_wt_network.RData")
-color_EC_wt <- moduleColors
-x = load("../../WGCNA/EC_damaged_network.RData")
-color_EC_damaged <- moduleColors
-colorList = list(color_EC_wt, color_EC_damaged);
+x = load("../../WGCNA/moulePreservation/FAP/FAP_wt_network.RData")
+color_wt <- moduleColors
+x = load("../../WGCNA/moulePreservation/FAP/FAP_damaged_network.RData")
+color_damaged <- moduleColors
+colorList = list(color_wt, color_damaged);
 names(colorList) = setLabels;
 
 ## calculate module preservation statistics
 # 82 min 
 system.time( {
-  mp_EC = modulePreservation(multiExpr, colorList,referenceNetworks = c(1:2),loadPermutedStatistics = FALSE,nPermutations = 200,verbose = 3)
+  mp = modulePreservation(multiExpr, colorList,referenceNetworks = c(1:2),loadPermutedStatistics = FALSE,nPermutations = 200,verbose = 3)
 });
 
+load (file = "../../WGCNA/EC_mp.RData")
 
 magenta_genes <- read.table("../../WGCNA/magenta_genes_EC.txt" , header = FALSE) %>% unlist() %>% unname()
 days = c("D0" , "D1" , "D2"  , "D3" , "D5" , "D6" , "D7" , "D10" )

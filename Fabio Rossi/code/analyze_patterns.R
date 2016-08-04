@@ -11,25 +11,45 @@ plotCluster(EC_damaged_log , res95_notRep[[tail(idx ,1)]] , "original" , 0) -> p
 multiplot(pn , p , cols = 2)
 
 
-## looking at WT patterns 
-## 
-EC_WT_m1_80_size <- sapply(EC_WT_m1_80 , function(x) {length (x)}) 
-EC_WT_m1_80_size  %>% order() %>% tail (100) -> idx
-i = 98
-ii <- idx[101-i]
-
-days = c("D0" , "D1" , "D2"  , "D3" , "D5" , "D6" , "D7" , "D10" )
-plotCluster(EC_damaged_log_filtered , EC_WT_m1_80[[ii]] , paste( "cluster", i  , sep = " "),days )
-plotCluster(EC_WT_log_filtered_n_1 ,EC_WT_m1_80[[ii]] , paste( "cluster", i  , sep = " "),EC_WT_days1  )
 
 
-load("../../code/clustering res/method1/EC/EC_WT90.RData")
-EC_WT_m1_90_size <- sapply(EC_WT_m1_90 , function(x) {length (x)}) 
-EC_WT_m1_90_size  %>% order() %>% tail (100) -> idx
-i = 48
-ii <- idx[101-i]
+plotPairedKOvsWT <- function (wt_table , ko_table , cluster_res , wt_days , ko_days , num , path, jj)
+{
+  cluster_res_num <- sapply(cluster_res , function(x) {length (x)}) 
+  cluster_res_num  %>% order() %>% tail (num) -> idx
+  
+  pdf(file=path) 
+  for (i in num:1)
+  {
+    print(i)
+    par(mfrow = c(2,2))
+    print (plotCluster( wt_table , cluster_res[[  idx[i] ]]  , paste("WT-cluster" , i , sep = "-") , wt_days , jj) )
+    print (plotCluster( ko_table , cluster_res[[  idx[i] ]]  , paste( "KO-cluster" , i , sep = "-") , ko_days , jj) )
+  }
+  dev.off()
+}
 
-days = c("D0" , "D1" , "D2"  , "D3" , "D5" , "D6" , "D7" , "D10" )
-plotCluster(EC_damaged_log_filtered , EC_WT_m1_90[[ii]] %>% unique(), paste( "cluster", i  , sep = " "),days )
-plotCluster(EC_WT_log_filtered_n_1 ,EC_WT_m1_90[[ii]] , paste( "cluster", i  , sep = " "),EC_WT_days1  )
+plotPairedKOvsWT_v2 <- function (wt_table , ko_table , cluster_res , wt_days , ko_days , num , path, jj)
+{
+  cluster_res_num <- sapply(cluster_res , function(x) {length (x)}) 
+  cluster_res_num  %>% order() %>% tail (num) -> idx
+  
+  pdf(file=path) 
+  for (i in num:1)
+  {
+    print(i)
+    p1 <- plotCluster( wt_table , cluster_res[[  idx[i] ]]  , paste("WT-cluster" , i , sep = "-") , wt_days , jj) 
+    p2 <- plotCluster( ko_table , cluster_res[[  idx[i] ]]  , paste( "KO-cluster" , i , sep = "-") , ko_days , jj) 
+    multiplot(p1 , p2 , rows = 2)
+  }
+  dev.off()
+}
 
+## looking at WT and KO patterns 
+ec_path = "../../code/clustering res/method1/EC/WT_KO_patterns.pdf"
+plotPairedKOvsWT (EC_WT_log_filtered_n_1 , EC_damaged_log_filtered_n , EC_WT_m1_80 , EC_WT_days1 , EC_damaged_days , 200 ,ec_path ,3)
+fap_path = "../../code/clustering res/method1/FAP/WT_KO_patterns.pdf"
+plotPairedKOvsWT (FAP_WT_log_filtered_n_1 , FAP_damaged_log_filtered_n_1 , FAP_WT_m1_80 , FAP_WT_days1 , FAP_ko_days1 , 200 ,fap_path ,3)
+muscle_path = "../../code/clustering res/method1/muscle/WT_KO_patterns.pdf"
+plotPairedKOvsWT (muscleProgenitors_WT_log_filtered_n_1 , muscleProgenitors_damaged_log_filtered_n_1 , 
+                  muscle_WT_m1_80 , muscle_WT_days1 , muscle_ko_days1 , 300 , muscle_path ,2)

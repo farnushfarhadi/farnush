@@ -28,7 +28,7 @@ logTransform_standardizeMyTable <- function(table , idx)
 logTransform <- function(table , idx)
 {
   #table <- failHandler(table)
-  names <- colnames(table)
+  (names <- colnames(table))
   
   t<- table [,idx:dim(table)[2]]
   r = dim(t)[1];
@@ -37,7 +37,14 @@ logTransform <- function(table , idx)
   p %>% as.numeric() -> p1
   matrix(p1 , nrow = r , ncol = c) -> t
   log (t + 1) -> t 
-  cbind (table[,1:(idx-1)] , t) -> tableFinal
+  if (idx ==2)
+  {
+    table[,1:(idx-1)] %>% as.character() -> firstCol
+    cbind (firstCol , t) -> tableFinal
+  } else{
+    cbind (table[,1:(idx-1)] , t) -> tableFinal
+  }
+  
   colnames(tableFinal) <- names
   return(tableFinal)
 }
@@ -90,6 +97,27 @@ ss_corHeatmap <- function (table , toWrite , names, idx)
   #         col=cols, cexCol=0.7, cexRow=0.55 , margins=c(8,8) , srtCol=45  
   #          , main = toWrite )
 } 
+read.table("../../elana/exmaple 2/group1.txt" , header = FALSE) %>% unlist() -> g 
+read.table("../../elana/exmaple 2/group2.txt" , header = FALSE) %>% unlist() %>% unname() -> g1
+g3 <- read.table("../../elana/example 4/group2.txt") %>% unlist() %>% unname()
+gg <- c( g , g1 , g3 )
+sapply(gg , function(x) {which (FAP_damaged_log_filtered_n$tracking_id == x)}) -> idx
+FAP_damaged_log_filtered_n[unname(idx) , - c(1,2)] -> part
+rownames(part) <- FAP_damaged_log_filtered_n$tracking_id[unname(idx) ] %>% as.character()
+cols<-c(rev(brewer.pal(9,"YlOrRd")), "#FFFFFF")
+
+heatmap.2(as.matrix(part) , scale = NULL ,  Rowv = FALSE , Colv = TRUE , dendrogram = "column" , trace="none",  
+          col=cols, cexCol=0.6, cexRow=0.5 , margins=c(5,5) , srtCol=90 , 
+          main = "example 2" )
+
+
+heatmap.2(as.matrix(part) , scale = NULL ,  Rowv = TRUE , Colv = FALSE , dendrogram = "row" , trace="none",  
+          col=cols, cexCol=0.6, cexRow=0.5 , margins=c(5,5) , srtCol=90 , 
+          main = "example 2" )
+
+heatmap.2(as.matrix(part) , scale = NULL ,  Rowv = TRUE , Colv = TRUE , dendrogram = "both" , trace="none",  
+          col=cols, cexCol=0.6, cexRow=0.5 , margins=c(5,5) , srtCol=90 , 
+          main = "example 2" )
 
 plotExpressionDist <- function (allSamples , t1 , t2)
 {
@@ -125,14 +153,22 @@ filterLowExpressedGenes <- function(table  , threshold , percentage)
 }
 
 
-QuantileNormalize <- function (table)
+QuantileNormalize <- function (table , idx)
 {
   r = dim (table)[1]
-  c= dim (table)[2] -2 
-  table [ , - c(1,2)] %>% as.matrix() %>% as.numeric() %>% matrix (nrow = r, ncol = c) -> table_m
+  c= dim (table)[2] - (idx-1) 
+  table [ , - c(1:(idx-1))] %>% as.matrix() %>% as.numeric() %>% matrix (nrow = r, ncol = c) -> table_m
   normalize.quantiles(table_m , copy = TRUE) -> table_normal
-  colnames (table_normal ) <- colnames(table [ , - c(1,2)])
-  return (cbind (table[ , c(1,2)] , table_normal))
+  (colnames (table_normal ) <- colnames(table [ , - c(1:(idx-1))]))
+  if (idx ==2)
+  {
+    table[,1:(idx-1)] %>% as.character() -> firstCol
+    cbind (firstCol , table_normal) -> tableFinal
+  } else{
+    cbind (table[,1:(idx-1)] , table_normal) -> tableFinal
+  }
+  (colnames (tableFinal ) <- colnames(table ))
+  return (tableFinal)
 }
 
 
@@ -140,8 +176,8 @@ dataQC <- function (table , threshold , percentage , title , names , idx)
 {
   logTransform (table , idx) -> table_log
   filterLowExpressedGenes(table_log , threshold , percentage) -> table_log_filtered 
-  QuantileNormalize (table_log_filtered) -> table_log_filtered_n 
+  QuantileNormalize (table_log_filtered , idx) -> table_log_filtered_n 
   ss_corHeatmap (table_log_filtered_n , title , names , idx)
-  return(table_log_filtered_n)
+  return(as.data.frame( table_log_filtered_n) )
 }
 

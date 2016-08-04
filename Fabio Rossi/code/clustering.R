@@ -58,10 +58,11 @@ method <- function (table , threshold )
   #return (subgroups)
  }
 
- plotCluster <- function (table , cluster , title , dayNames)
+ plotCluster <- function (table , cluster , title , dayNames , jj)
  {
    (sapply(cluster, function(x) {which (table$tracking_id == x)}) -> cluster_idx  )
-   t = table [ Reduce(union , cluster_idx), -c(1,2)] %>% as.matrix() 
+   t = table [ Reduce(union , cluster_idx), -c(1:(jj-1))] %>% as.matrix() 
+   t <- t %>% as.numeric() %>% matrix(nrow = dim(t)[1] , ncol = dim(t)[2] , byrow = FALSE)
    # if (z)
    # {
    #   cluster.means <- apply(t, 1, mean)
@@ -104,7 +105,8 @@ method <- function (table , threshold )
      theme(axis.text.x = element_text(angle = 90, hjust = 1) , legend.position="none") +
      ggtitle (paste (feature_number , " genes - " ,  paste (title , "standardized" , sep = "-")) )
    
-   multiplot(p1 , p2 , rows = 2)
+   #multiplot(p1 , p2 , rows = 2)
+   return (p1)
    #return (p)
  }
  
@@ -127,7 +129,7 @@ method <- function (table , threshold )
 res90_notRep_num  %>% order() %>% tail (30) -> idx
 res90_notRep_num [idx]
 
-plotTopdf <- function (path , table , cluster_res , title , num , dayNames)
+plotTopdf <- function (path , table , cluster_res , title , num , dayNames , jj = 3)
 {
   cluster_res_num <- sapply(cluster_res , function(x) {length (x)}) 
   cluster_res_num  %>% order() %>% tail (num) -> idx
@@ -135,7 +137,8 @@ plotTopdf <- function (path , table , cluster_res , title , num , dayNames)
   pdf(file=path) 
   for (i in num:1)
   {
-    print (plotCluster( table , cluster_res[[  idx[i] ]]  , title , dayNames) )
+    print(i)
+    print (plotCluster( table , cluster_res[[  idx[i] ]]  , title , dayNames , jj) )
   }
   dev.off()
 }
@@ -203,6 +206,31 @@ save (FAP_WT_m1_80 , file = "../../code/clustering res/method1/FAP/FAP_WT80.RDat
 method (FAP_damaged_log_filtered_n , 0.80 ) -> FAP_damaged_m1_80
 save (FAP_damaged_m1_80 , file = "../../code/clustering res/method1/FAP/FAP_KO80.RData")
 
+load("~/Documents/Farnush github/Fabio Rossi/code/clustering res/method1/FAP/FAP_WT80.RData")
+FAP_WT_m1_80_size <- sapply(FAP_WT_m1_80 , function(x) {length (x)}) 
+FAP_WT_m1_80_size  %>% order() %>% tail (100) -> idx
+FAP_WT_m1_80_size [idx]
+FAP_WT_Path = "../../code/clustering res/method1/FAP/WT_80.pdf"
+FAP_WT_days <- c("D0" , "D1" , "D2-1" , "D2-2" , "D2-3" , "D3-1" , "D3-2" , "D3-3" , "D4-1" , "D4-2" , "D5" , "D6" , "D7" , "D10" , "D14" )
+plotTopdf (FAP_WT_Path ,FAP_WT_log_filtered_n , FAP_WT_m1_80 , "80%" , 100 ,  FAP_WT_days)
+FAP_WT_log_filtered_n_1 = FAP_WT_log_filtered_n[ , c(1,2,3,4,5,8,11,13,14,15,16,17)]
+FAP_WT_Path = "../../code/clustering res/method1/FAP/rep1_WT_80.pdf"
+FAP_WT_days1 <- c("D0" ,"D1" , "D2-1" , "D3-1"  , "D4-1" , "D5" , "D6" , "D7" , "D10"  , "D14" )
+plotTopdf (FAP_WT_Path ,FAP_WT_log_filtered_n_1 , FAP_WT_m1_80 , "80%" , 100 ,  FAP_WT_days1)
+
+load("~/Documents/Farnush github/Fabio Rossi/code/clustering res/method1/FAP/FAP_KO80.RData")
+FAP_damaged_m1_80_size <- sapply(FAP_damaged_m1_80 , function(x) {length (x)}) 
+FAP_damaged_m1_80_size  %>% order() %>% tail (200) -> idx
+FAP_damaged_m1_80_size [idx]
+FAP_damaged_Path = "../../code/clustering res/method1/FAP/ko_80.pdf"
+FAP_damaged_days <- c("D0" , "D1" , "D2" , "D3-1" , "D3-2" , "D4" , "D5" , "D6"  , "D10")
+plotTopdf (FAP_damaged_Path ,FAP_damaged_log_filtered_n , FAP_damaged_m1_80 , "80%" , 200 ,  FAP_damaged_days)
+FAP_damaged_log_filtered_n_1 = FAP_damaged_log_filtered_n[ , c(1,2,3,4,5,6,8,9,10,11)]
+FAP_ko_Path = "../../code/clustering res/method1/FAP/rep1_ko_80.pdf"
+FAP_ko_days1 <- c("D0" , "D1" , "D2" , "D3-1" , "D4" , "D5" , "D6"  , "D10")
+plotTopdf (FAP_ko_Path ,FAP_damaged_log_filtered_n_1 , FAP_damaged_m1_80 , "80%" , 200 ,  FAP_ko_days1)
+
+
 ### muscle 
 method (muscleProgenitors_WT_log_filtered_n , 0.80 ) -> muscle_WT_m1_80
 save (muscle_WT_m1_80 , file = "../../code/clustering res/method1/muscle/muscle_WT80.RData")
@@ -210,6 +238,43 @@ method (muscleProgenitors_damaged_log_filtered_n , 0.80 ) -> muscle_damaged_m1_8
 save (muscle_damaged_m1_80 , file = "../../code/clustering res/method1/muscle/muscle_KO80.RData")
 
 
+load("~/Documents/Farnush github/Fabio Rossi/code/clustering res/method1/muscle/muscle_WT80.RData")
+muscle_WT_m1_80_size <- sapply(muscle_WT_m1_80 , function(x) {length (x)}) 
+muscle_WT_m1_80_size  %>% order() %>% tail (300) -> idx
+muscle_WT_m1_80_size [idx]
+muscle_WT_Path = "../../code/clustering res/method1/muscle/WT_80.pdf"
+muscle_WT_days <- c( "D1" , "D2" , "D3-1" , "D3-2" , "D5" ,  "D7"  , "D10")
+plotTopdf (muscle_WT_Path ,muscleProgenitors_WT_log_filtered_n , muscle_WT_m1_80 , "80%" , 300 ,  muscle_WT_days , 2)
+muscleProgenitors_WT_log_filtered_n_1 = muscleProgenitors_WT_log_filtered_n[ , c(1,2,3,4,6,7,8)]
+muscle_WT_Path = "../../code/clustering res/method1/muscle/rep1_WT_80.pdf"
+muscle_WT_days1 <- c( "D1" , "D2" , "D3-1" , "D5" ,  "D7"  , "D10")
+plotTopdf (muscle_WT_Path ,muscleProgenitors_WT_log_filtered_n_1 , muscle_WT_m1_80 , "80%" , 300 ,  muscle_WT_days1 , 2)
+
+load("~/Documents/Farnush github/Fabio Rossi/code/clustering res/method1/muscle/muscle_KO80.RData")
+muscle_ko_m1_80_size <- sapply(muscle_damaged_m1_80 , function(x) {length (x)}) 
+muscle_ko_m1_80_size  %>% order() %>% tail (200) -> idx
+muscle_ko_m1_80_size [idx]
+muscle_ko_Path = "../../code/clustering res/method1/muscle/ko_80.pdf"
+muscle_ko_days <- c( "D0" , "D3-1" , "D3-2" ,"D4" , "D5" ,"D6"  , "D10")
+plotTopdf (muscle_ko_Path ,muscleProgenitors_damaged_log_filtered_n , muscle_damaged_m1_80 , "80%" , 200 ,  muscle_ko_days, 2)
+muscleProgenitors_damaged_log_filtered_n_1 = muscleProgenitors_damaged_log_filtered_n[ , c(1,2,3,5,6,7,8)]
+muscle_ko_Path1 = "../../code/clustering res/method1/muscle/rep1_ko_80.pdf"
+muscle_ko_days1 <- c( "D0" , "D3-1" ,"D4" , "D5" ,"D6"  , "D10")
+plotTopdf (muscle_ko_Path1 ,muscleProgenitors_damaged_log_filtered_n_1 , muscle_damaged_m1_80 , "80%" , 200 ,  muscle_ko_days1, 2)
+
 ## inflammatory
 method (inflammatory_WT_log_filtered_n , 0.80 ) -> inflammatory_WT_m1_80
 save (inflammatory_WT_m1_80 , file = "../../code/clustering res/method1/inflammatory/inflammatory_KO80.RData")
+
+
+load("~/Documents/Farnush github/Fabio Rossi/code/clustering res/method1/inflammatory/inflammatory_KO80.RData")
+inflammatory_WT_m1_80_size <- sapply(inflammatory_WT_m1_80 , function(x) {length (x)}) 
+inflammatory_WT_m1_80_size  %>% order() %>% tail (100) -> idx
+inflammatory_WT_m1_80_size [idx]
+inflammatory_WT_Path = "../../code/clustering res/method1/inflammatory/WT_80.pdf"
+inflammatory_WT_days <- c( "D1-1", "D1-2" ,"D2-1" , "D2-2" , "D2-3" , "D3-1" , "D3-2" , "D3-3" , "D4"  ,"D5" ,"D6","D7-1" ,"D7-2" , "D10")
+plotTopdf (inflammatory_WT_Path ,inflammatory_WT_log_filtered_n , inflammatory_WT_m1_80 , "80%" , 100 ,  inflammatory_WT_days , 2)
+inflammatory_WT_log_filtered_n_1 = inflammatory_WT_log_filtered_n[ , c(1,2,4,7,10,11,12,13,15)]
+inflammatory_WT_Path1 = "../../code/clustering res/method1/inflammatory/rep1_WT_80.pdf"
+inflammatory_WT_days1 <-  c( "D1-1" ,"D2-1" , "D3-1" ,"D4"  ,"D5" ,"D6","D7-1" , "D10")
+plotTopdf (inflammatory_WT_Path1 ,inflammatory_WT_log_filtered_n_1 , inflammatory_WT_m1_80 , "80%" , 100 ,  inflammatory_WT_days1 , 2)
