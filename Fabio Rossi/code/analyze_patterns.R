@@ -29,7 +29,7 @@ plotPairedKOvsWT <- function (wt_table , ko_table , cluster_res , wt_days , ko_d
   dev.off()
 }
 
-plotPairedKOvsWT_v2 <- function (wt_table , ko_table , cluster_res , wt_days , ko_days , num , path, jj)
+plotPairedKOvsWT <- function (wt_table , ko_table , cluster_res , wt_days , ko_days , num , path, jj)
 {
   cluster_res_num <- sapply(cluster_res , function(x) {length (x)}) 
   cluster_res_num  %>% order() %>% tail (num) -> idx
@@ -46,10 +46,10 @@ plotPairedKOvsWT_v2 <- function (wt_table , ko_table , cluster_res , wt_days , k
 }
 
 ## looking at WT and KO patterns 
-ec_path = "../../code/clustering res/method1/EC/WT_KO_patterns.pdf"
+ec_path = "../../code/clustering res/method1/EC/WT_KO_patterns_v3.pdf"
 plotPairedKOvsWT (EC_WT_log_filtered_n_1 , EC_damaged_log_filtered_n , EC_WT_m1_80 , EC_WT_days1 , EC_damaged_days , 200 ,ec_path ,3)
-fap_path = "../../code/clustering res/method1/FAP/WT_KO_patterns.pdf"
+fap_path = "../../code/clustering res/method1/FAP/WT_KO_patterns_v3.pdf"
 plotPairedKOvsWT (FAP_WT_log_filtered_n_1 , FAP_damaged_log_filtered_n_1 , FAP_WT_m1_80 , FAP_WT_days1 , FAP_ko_days1 , 200 ,fap_path ,3)
-muscle_path = "../../code/clustering res/method1/muscle/WT_KO_patterns.pdf"
+muscle_path = "../../code/clustering res/method1/muscle/WT_KO_patterns_v3.pdf"
 plotPairedKOvsWT (muscleProgenitors_WT_log_filtered_n_1 , muscleProgenitors_damaged_log_filtered_n_1 , 
                   muscle_WT_m1_80 , muscle_WT_days1 , muscle_ko_days1 , 300 , muscle_path ,2)

@@ -22,7 +22,7 @@ prepareDataWGCNA <- function (wt , ko , idx)
   all <- cbind (wt , ko [ , - c(1,2)])
   filterLowExpressedGenes(logTransform(all) , 0.7 , 1) -> all_log_filtered
   
-  #
+  #remove isoforms
   sapply(all_log_filtered$tracking_id %>% unique() %>% as.character(), function(x) {which (all_log_filtered$tracking_id == x)} ) -> hh 
   k = c()
   for (i in 1:length(hh))
@@ -49,45 +49,65 @@ prepareDataWGCNA <- function (wt , ko , idx)
 
 ### soft thresholding 
 #datExprAll <- prepareDataWGCNA(EC_WT , EC_damaged , 3) # 8711
-datExprAll <- prepareDataWGCNA(FAP_WT , FAP_damaged , 3) # 7985
+#datExprAll <- prepareDataWGCNA(FAP_WT , FAP_damaged , 3) # 7985
+datExprAll <- prepareDataWGCNA(muscleProgenitors_WT , muscleProgenitors_damaged , 2) # 8563
 
 wt_expr <- datExprAll[[1]]
 damaged_expr <- datExprAll[[2]]
 
-powers = c(c(1:10), seq(from = 12, to=30, by=2))
+powers = c(c(1:10), seq(from = 12, to=20, by=2))
+
+powers = c(1:25)
+powers = seq (from = 115900 , to = 116020 , by = 5)
 # Call the network topology analysis function
 
 sft_wt = pickSoftThreshold(wt_expr, powerVector = powers, verbose = 5)
 sft_damaged = pickSoftThreshold(damaged_expr, powerVector = powers, verbose = 5)
 
+save (sft_wt ,file= "../../WGCNA/moulePreservation/EC/sft_EC_wt.RData")
+save (sft_damaged , file =  "../../WGCNA/moulePreservation/EC/sft_EC_ko.RData")
+
 save (sft_wt ,file= "../../WGCNA/moulePreservation/FAP/sft_FAP_wt.RData")
 save (sft_damaged , file =  "../../WGCNA/moulePreservation/FAP/sft_FAP_ko.RData")
 
-load(file = "../../WGCNA/moulePreservation/FAP/sft_FAP_wt.RData")
-load(file = "../../WGCNA/moulePreservation/FAP/sft_FAP_ko.RData")
+save (sft_wt ,file= "../../WGCNA/moulePreservation/muscle/sft_muscle_wt.RData")
+save (sft_damaged , file =  "../../WGCNA/moulePreservation/muscle/sft_muscle_ko.RData")
 
-#FAP 26 - EC 14
+# load(file = "../../WGCNA/moulePreservation/FAP/sft_FAP_wt.RData")
+# load(file = "../../WGCNA/moulePreservation/FAP/sft_FAP_ko.RData")
+load(file = "../../WGCNA/moulePreservation/muscle/sft_muscle_wt.RData")
+load(file = "../../WGCNA/moulePreservation/muscle/sft_muscle_ko.RData")
+
+#FAP 25 - EC 13
 plot_networkTopology (sft_wt)
-#FAP 24 - EC 22
+#FAP 22 - EC 16
 plot_networkTopology (sft_damaged) 
 
-net_wt = blockwiseModules(wt_expr, power = 26, TOMType = "unsigned", minModuleSize = 30, reassignThreshold = 0, mergeCutHeight = 0.25,
+net_wt = blockwiseModules(wt_expr, power = 25, TOMType = "unsigned", minModuleSize = 30, reassignThreshold = 0, mergeCutHeight = 0.25,
                        numericLabels = TRUE, pamRespectsDendro = FALSE, saveTOMs = TRUE, saveTOMFileBase = "femaleMouseTOM", verbose = 3)
 
-net_damaged = blockwiseModules(damaged_expr, power = 24, TOMType = "unsigned", minModuleSize = 30, reassignThreshold = 0, mergeCutHeight = 0.25,
+net_damaged = blockwiseModules(damaged_expr, power = 22 , TOMType = "unsigned", minModuleSize = 30, reassignThreshold = 0, mergeCutHeight = 0.25,
                              numericLabels = TRUE, pamRespectsDendro = FALSE, saveTOMs = TRUE, saveTOMFileBase = "femaleMouseTOM", verbose = 3)
+
+save (net_wt ,file= "../../WGCNA/moulePreservation/EC/net_EC_wt.RData")
+save (net_wt ,file= "../../WGCNA/moulePreservation/EC/net_EC_ko.RData")
+load(file = "../../WGCNA/moulePreservation/EC/net_EC_wt.RData")
+load(file = "../../WGCNA/moulePreservation/EC/net_EC_ko.RData")
+
 
 save (net_wt ,file= "../../WGCNA/moulePreservation/FAP/net_FAP_wt.RData")
 save (net_damaged , file =  "../../WGCNA/moulePreservation/FAP/net_FAP_ko.RData")
-
 load(file = "../../WGCNA/moulePreservation/FAP/net_FAP_wt.RData")
 load(file = "../../WGCNA/moulePreservation/FAP/net_FAP_ko.RData")
 
 clusteringDendogramGenes(net_wt)
 clusteringDendogramGenes(net_damaged)
 
-saveIt (net_wt , "../../WGCNA/moulePreservation/FAP/FAP_wt_network.RData")
-saveIt (net_damaged , "../../WGCNA/moulePreservation/FAP/FAP_damaged_network.RData")
+saveIt (net_wt , "../../WGCNA/moulePreservation/EC/network_wt.RData")
+saveIt (net_damaged , "../../WGCNA/moulePreservation/EC/network_ko.RData")
+
+saveIt (net_wt , "../../WGCNA/moulePreservation/FAP/network_wt.RData")
+saveIt (net_damaged , "../../WGCNA/moulePreservation/FAP/network_ko.RData")
 
 
 ##### loading the networks and preparing data for module preservation
@@ -98,20 +118,27 @@ multiExpr[[2]] = list(data = damaged_expr);
 setLabels = c("WT", "CCR2_KO");
 names(multiExpr) = setLabels
 
-x = load("../../WGCNA/moulePreservation/FAP/FAP_wt_network.RData")
+x = load("../../WGCNA/moulePreservation/EC/network_wt.RData")
+x = load("../../WGCNA/moulePreservation/FAP/network_wt.RData")
 color_wt <- moduleColors
-x = load("../../WGCNA/moulePreservation/FAP/FAP_damaged_network.RData")
+x = load("../../WGCNA/moulePreservation/FAP/network_ko.RData")
+x = load("../../WGCNA/moulePreservation/EC/network_ko.RData")
 color_damaged <- moduleColors
 colorList = list(color_wt, color_damaged);
 names(colorList) = setLabels;
 
 ## calculate module preservation statistics
-# 82 min 
+# 82 min EC
+# 62 min FAP
 system.time( {
   mp = modulePreservation(multiExpr, colorList,referenceNetworks = c(1:2),loadPermutedStatistics = FALSE,nPermutations = 200,verbose = 3)
 });
 
-load (file = "../../WGCNA/EC_mp.RData")
+save(mp , file = "../../WGCNA/moulePreservation/EC/mp.RData")
+load (file = "../../WGCNA/moulePreservation/EC/mp.RData")
+
+save(mp , file = "../../WGCNA/moulePreservation/FAP/mp.RData")
+load (file = "../../WGCNA/moulePreservation/FAP/mp.RData")
 
 magenta_genes <- read.table("../../WGCNA/magenta_genes_EC.txt" , header = FALSE) %>% unlist() %>% unname()
 days = c("D0" , "D1" , "D2"  , "D3" , "D5" , "D6" , "D7" , "D10" )
@@ -171,7 +198,7 @@ plot_networkTopology <- function (sft)
   text(sft$fitIndices[,1], -sign(sft$fitIndices[,3])*sft$fitIndices[,2],
        labels=powers,cex=cex1,col="red");
   # this line corresponds to using an R^2 cut-off of h
-  abline(h=0.85,col="red")
+  abline(h=0.8,col="red")
   # Mean connectivity as a function of the soft-thresholding power
   plot(sft$fitIndices[,1], sft$fitIndices[,5],
        xlab="Soft Threshold (power)",ylab="Mean Connectivity", type="n",

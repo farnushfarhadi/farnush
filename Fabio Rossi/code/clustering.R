@@ -106,7 +106,7 @@ method <- function (table , threshold )
      ggtitle (paste (feature_number , " genes - " ,  paste (title , "standardized" , sep = "-")) )
    
    #multiplot(p1 , p2 , rows = 2)
-   return (p1)
+   return (p2)
    #return (p)
  }
  
