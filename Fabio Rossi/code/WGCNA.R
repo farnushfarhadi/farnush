@@ -129,7 +129,7 @@ names(colorList) = setLabels;
 
 ## calculate module preservation statistics
 # 82 min EC
-# 62 min FAP
+# 63 min FAP
 system.time( {
   mp = modulePreservation(multiExpr, colorList,referenceNetworks = c(1:2),loadPermutedStatistics = FALSE,nPermutations = 200,verbose = 3)
 });
