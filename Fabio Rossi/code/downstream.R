@@ -10,7 +10,7 @@ read.delim("ligand-receptor.txt" , header = TRUE) -> ligand_receptor
 
 ligand_receptor$Receptor..Symbols. %>% as.character() %>% unique()-> receptor # 378 receptors
 
-plotLigand_ReceptorDownstream <- function (receptor_gene)
+plotLigand_ReceptorDownstream <- function (receptor_gene , table1 , table2 , t1 , t2 , dayNames1 , dayNames2, jj1 , jj2)
 {
   # extracting genes from ppi 
   which (ppi_human$interactor_1_geneSymbol == receptor_gene) -> idx1
@@ -26,6 +26,7 @@ plotLigand_ReceptorDownstream <- function (receptor_gene)
   ds_g <- setdiff(g , ligands)
   
   # plotting downstream genes and ligands
-  
+  plotCluster(table1 , ds_g , paste ("receptor downstream" , t1 , sep = "-") , dayNames1 , jj1) -> p1
+  plotCluster(table2 , ligands , paste ("ligand" , t2 , sep = "-") , dayNames1 , jj2) -> p2
   
 }
