@@ -1,10 +1,6 @@
 ### standardizing
-library(preprocessCore)
-library (gplots)
-library (RColorBrewer)
-library (ggplot2)
-library (reshape)
-library (gridExtra)
+
+
 logTransform_standardizeMyTable <- function(table , idx)
 {
   

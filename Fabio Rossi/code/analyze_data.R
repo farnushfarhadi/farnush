@@ -4,13 +4,14 @@
 
 
 ## LOAD Data from here
-load (file = "../saved in R /EC_WT.RData")
-load (file = "../saved in R /EC_damaged.RData")
-load (file = "../saved in R /FAP_WT.RData")
-load (file = "../saved in R /FAP_damaged.RData")
-load (file = "../saved in R /inflammatory_WT.RData")
-load (file = "../saved in R /muscleProgenitors_WT.RData")
-load (file = "../saved in R /muscleProgenitors_damaged.RData")
+setwd("Fabio Rossi/data/saved in R /")
+load (file = "EC_WT.RData")
+load (file = "EC_damaged.RData")
+load (file = "FAP_WT.RData")
+load (file = "FAP_damaged.RData")
+load (file = "inflammatory_WT.RData")
+load (file = "muscleProgenitors_WT.RData")
+load (file = "muscleProgenitors_damaged.RData")
 
 ## we handle fail values, log transform and then standardize tables
 # logTransform_standardizeMyTable(EC_WT) -> EC_WT_processed

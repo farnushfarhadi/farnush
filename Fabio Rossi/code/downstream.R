@@ -1,4 +1,4 @@
-setwd("~/Documents/Farnush github/Fabio Rossi/cell cell comunication/")
+setwd("~/Documents/Farnush GitHub/Fabio Rossi/cell cell comunication/")
 #read.table("FLAT_FILES_072010/BINARY_PROTEIN_PROTEIN_INTERACTIONS.txt" , header = FALSE ) -> ppi_human
 read.delim("HPRD/FLAT_FILES_072010/BINARY_PROTEIN_PROTEIN_INTERACTIONS.txt" , header = FALSE ) -> ppi_human
 ppi_human[ , 1:6]   -> ppi_human

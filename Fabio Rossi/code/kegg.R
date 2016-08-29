@@ -1,7 +1,6 @@
-source("https://bioconductor.org/biocLite.R")
-biocLite("KEGGREST")
-library(KEGGREST)
-library (dplyr)
+#source("https://bioconductor.org/biocLite.R")
+#biocLite("KEGGREST")
+
 
 
 
@@ -71,7 +70,7 @@ FAP_KO_days_rep1 <- c("D0" , "D1" , "D2" , "D3-1" , "D4" , "D5" , "D6"  , "D10")
 ### loading receptors and ligands
 setwd("~/Documents/Farnush github/Fabio Rossi/cell cell comunication/")
 read.delim("receptor-id.txt" , header = TRUE) -> receptors
-receptors <- receptors %>% unlist() %>% as.character()
+#receptors <- receptors %>% unlist() %>% as.character()
 read.delim("UniqueLigands.txt" , header = TRUE) -> ligands
 ligands <- ligands %>% unlist() %>% as.character()
 
@@ -81,12 +80,15 @@ receptors$Gene.ID %>% as.character() -> receptor_id
 #sapply(receptors, function(x){which (genes_symbol_entrez_n == toupper(x))}) -> receptors_entrez_idx
 sapply(receptor_id, function(x){return (paste0("mmu:",x %>% unname()))} ) %>% unname() -> kegg_entries_receptors
 
-i= 2
+i= 1
 (gene_entry = kegg_entries_receptors [i])
 (symbol = receptor_symbol[i])
-for (i in 1:length(kegg_entries_receptors))
+#length(kegg_entries_receptors
+for (i in 1:10)
 {
-  downstreamGenes(kegg_entries_receptors[i] , receptor_symbol[i] )
+  print(kegg_entries_receptors[i])
+  print(receptor_symbol[i])
+  downstreamGenes(kegg_entries_receptors[i] , receptor_symbol[i] ) -> res
 }
 downstreamGenes <- function (gene_entry , symbol)
 {
@@ -97,21 +99,40 @@ downstreamGenes <- function (gene_entry , symbol)
   if (gene_entry_pathways %>% length() == 0) {print ("NA")}
   if (gene_entry_pathways %>% length() == 0) {return ("NA")}
   sapply(gene_entry_pathways, function(x){getPathwayGenesEntrez(x)}) -> gene_entry_pathways_genes
+  #if (gene_entry_pathways %>% length() == 1)
+   # gene_entry_pathways_genes = list (gene_entry_pathways_genes)
   
   # for each pathway, have a plot
-  file = "~/Documents/Farnush github/Fabio Rossi/cell cell comunication/receptor_keg_plots/"
+  #file = "~/Documents/Farnush github/Fabio Rossi/cell cell comunication/receptor_keg_plots/"
+  file = "~/Documents/Farnush github/Fabio Rossi/cell cell comunication/receptor_keg_hclust/"
   path = paste (file , paste0 (symbol , ".pdf") , sep = "/")
   pdf(file=path)
   for ( i in 1:length(gene_entry_pathways_genes))
   {
+    print (length(gene_entry_pathways_genes))
     paste (gene_entry_pathways[i],symbol, sep = "/") -> t
-    plotCluster(EC_WT_log_filtered_n_rep1 , gene_entry_pathways_genes[[i]] %>% toupper(),paste (t , "EC_WT" , sep = "/") , EC_WT_days_rep1,3) -> p1
-    plotCluster(EC_KO_log_filtered_n_rep1 , gene_entry_pathways_genes[[i]]%>% toupper(),paste (t , "EC_KO" , sep = "/"), EC_KO_days_rep1,3) -> p2
-    plotCluster(FAP_WT_log_filtered_n_rep1 , gene_entry_pathways_genes[[i]]%>% toupper(),paste (t , "FAP_WT" , sep = "/"), FAP_WT_days_rep1,3) -> p3
-    plotCluster(FAP_KO_log_filtered_n_rep1 , gene_entry_pathways_genes[[i]]%>% toupper(),paste (t , "EC_KO" , sep = "/"), FAP_KO_days_rep1,3) -> p4
-    multiplot(p1, p2 , p3 , p4 , cols = 1)
+    hierarchical_clustering(gene_entry_pathways_genes[[i]] %>% as.character() , 
+    EC_WT_log_filtered_n_rep1 , 3 , paste (t , "EC_WT" , sep = "/") )  
+    hierarchical_clustering(gene_entry_pathways_genes[[i]] %>% as.character() , 
+    EC_KO_log_filtered_n_rep1 , 3 , paste (t , "EC_KO" , sep = "/")) 
+    hierarchical_clustering(gene_entry_pathways_genes[[i]] %>% as.character() ,
+    FAP_WT_log_filtered_n_rep1 , 3 , paste (t , "FAP_WT" , sep = "/")) 
+    hierarchical_clustering(gene_entry_pathways_genes[[i]] %>% as.character() , 
+    FAP_KO_log_filtered_n_rep1 , 3 , paste (t , "EC_KO" , sep = "/")) 
+#     plotCluster(EC_WT_log_filtered_n_rep1 , gene_entry_pathways_genes[[i]] %>% toupper(),paste (t , "EC_WT" , sep = "/") , EC_WT_days_rep1,3) -> p1
+#     plotCluster(EC_KO_log_filtered_n_rep1 , gene_entry_pathways_genes[[i]]%>% toupper(),paste (t , "EC_KO" , sep = "/"), EC_KO_days_rep1,3) -> p2
+#     plotCluster(FAP_WT_log_filtered_n_rep1 , gene_entry_pathways_genes[[i]]%>% toupper(),paste (t , "FAP_WT" , sep = "/"), FAP_WT_days_rep1,3) -> p3
+#     plotCluster(FAP_KO_log_filtered_n_rep1 , gene_entry_pathways_genes[[i]]%>% toupper(),paste (t , "EC_KO" , sep = "/"), FAP_KO_days_rep1,3) -> p4
+#     multiplot(p1, p2 , p3 , p4 , cols = 1)
+    #if (r1 == "NA" || r2 == "NA" || r3 == "NA" || r4 == "NA")
+     # contin
+#     plot(r1)
+#     plot(r2)
+#     plot(r3)
+#     plot(r4)
   }
   dev.off()
+  #return (gene_entry_pathways_genes)
 }
 
 getPathwayGenesEntrez <- function (pathway)
@@ -122,7 +143,7 @@ getPathwayGenesEntrez <- function (pathway)
     ii <- seq (from= 2 , to = length(pathway_inf[[1]]$GENE) , by = 2)
     strs <- pathway_inf[[1]]$GENE[ii]
     sapply(strs, function(x){ return (substr ( x , start = 1 ,stop = unlist(gregexpr (";" , x ))-1 ) %>% toupper())}) %>% unname() -> res
-    return (res)
+    return (as.data.frame (res))
   } else {
     return ("NA")
   }
