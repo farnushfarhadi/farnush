@@ -84,12 +84,15 @@ i= 1
 (gene_entry = kegg_entries_receptors [i])
 (symbol = receptor_symbol[i])
 #length(kegg_entries_receptors
-for (i in 1:10)
+receptor_res = c()
+for (i in 1:length(kegg_entries_receptors))
 {
   print(kegg_entries_receptors[i])
   print(receptor_symbol[i])
   downstreamGenes(kegg_entries_receptors[i] , receptor_symbol[i] ) -> res
+  receptor_res = c (receptor_res , res)
 }
+receptor_res_complete <- receptor_res
 downstreamGenes <- function (gene_entry , symbol)
 {
   gene_entry_inf <- try(keggGet(gene_entry), silent=TRUE)
@@ -107,18 +110,26 @@ downstreamGenes <- function (gene_entry , symbol)
   file = "~/Documents/Farnush github/Fabio Rossi/cell cell comunication/receptor_keg_hclust/"
   path = paste (file , paste0 (symbol , ".pdf") , sep = "/")
   pdf(file=path)
+  EC_wt_res = c ()
+  EC_ko_res = c ()
+  FAP_wt_res = c ()
+  FAP_ko_res = c ()
   for ( i in 1:length(gene_entry_pathways_genes))
   {
-    print (length(gene_entry_pathways_genes))
+    print (paste (length(gene_entry_pathways_genes) , i , sep = "-"))
     paste (gene_entry_pathways[i],symbol, sep = "/") -> t
     hierarchical_clustering(gene_entry_pathways_genes[[i]] %>% as.character() , 
-    EC_WT_log_filtered_n_rep1 , 3 , paste (t , "EC_WT" , sep = "/") )  
+    EC_WT_log_filtered_n_rep1 , 3 , paste (t , "EC_WT" , sep = "/") )  -> r1
+    EC_wt_res = c(EC_wt_res , r1)
     hierarchical_clustering(gene_entry_pathways_genes[[i]] %>% as.character() , 
-    EC_KO_log_filtered_n_rep1 , 3 , paste (t , "EC_KO" , sep = "/")) 
+    EC_KO_log_filtered_n_rep1 , 3 , paste (t , "EC_KO" , sep = "/")) -> r2
+    EC_ko_res = c(EC_ko_res , r2)
     hierarchical_clustering(gene_entry_pathways_genes[[i]] %>% as.character() ,
-    FAP_WT_log_filtered_n_rep1 , 3 , paste (t , "FAP_WT" , sep = "/")) 
+    FAP_WT_log_filtered_n_rep1 , 3 , paste (t , "FAP_WT" , sep = "/")) -> r3
+    FAP_wt_res = c( FAP_wt_res , r3)
     hierarchical_clustering(gene_entry_pathways_genes[[i]] %>% as.character() , 
-    FAP_KO_log_filtered_n_rep1 , 3 , paste (t , "EC_KO" , sep = "/")) 
+    FAP_KO_log_filtered_n_rep1 , 3 , paste (t , "EC_KO" , sep = "/")) -> r4
+    FAP_ko_res = c(FAP_ko_res , r4)
 #     plotCluster(EC_WT_log_filtered_n_rep1 , gene_entry_pathways_genes[[i]] %>% toupper(),paste (t , "EC_WT" , sep = "/") , EC_WT_days_rep1,3) -> p1
 #     plotCluster(EC_KO_log_filtered_n_rep1 , gene_entry_pathways_genes[[i]]%>% toupper(),paste (t , "EC_KO" , sep = "/"), EC_KO_days_rep1,3) -> p2
 #     plotCluster(FAP_WT_log_filtered_n_rep1 , gene_entry_pathways_genes[[i]]%>% toupper(),paste (t , "FAP_WT" , sep = "/"), FAP_WT_days_rep1,3) -> p3
@@ -132,6 +143,9 @@ downstreamGenes <- function (gene_entry , symbol)
 #     plot(r4)
   }
   dev.off()
+  list (EC_wt_res , EC_ko_res , FAP_wt_res , FAP_ko_res) -> ret
+  names (ret) <- c ("EC_WT" , "EC_KO" , "FAP_WT" , "FAP_KO")
+  return (ret)
   #return (gene_entry_pathways_genes)
 }
 
