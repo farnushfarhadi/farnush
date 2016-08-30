@@ -85,7 +85,8 @@ i= 1
 (symbol = receptor_symbol[i])
 #length(kegg_entries_receptors
 receptor_res = c()
-for (i in 1:length(kegg_entries_receptors))
+#length(kegg_entries_receptors)
+for (i in 1:10)
 {
   print(kegg_entries_receptors[i])
   print(receptor_symbol[i])
@@ -93,6 +94,51 @@ for (i in 1:length(kegg_entries_receptors))
   receptor_res = c (receptor_res , res)
 }
 receptor_res_complete <- receptor_res
+
+save (receptor_res_complete , file = "receptor_keg_hclust/hclust_complete.RData")
+load("receptor_keg_hclust/hclust_complete.RData")
+
+hierarchicalClusteringAnalysis <- function (cluster_res)
+{
+  (which (cluster_res == "NA") -> idx)
+  cluster_res [ -idx] -> cluster_res
+  seq (from = 1 , to =length(cluster_res)  , by = 4) -> ec_wt_idx
+  seq (from = 2 , to =length(cluster_res)  , by = 4) -> ec_ko_idx
+  seq (from = 3 , to =length(cluster_res)  , by = 4) -> fap_wt_idx
+  seq (from = 4 , to =length(cluster_res)  , by = 4) -> fap_ko_idx
+  seq (from = 5 , to =length(cluster_res)  , by = 4) -> symbols
+  cluster_res [ ec_wt_idx] -> ec_wt_res
+  cluster_res [ec_ko_idx] -> ec_ko_res
+  cluster_res [fap_wt_idx] -> fap_wt_res
+  cluster_res [fap_ko_idx] -> fap_ko_res
+  plotDistK_genes (ec_wt_res , "EC wild type")
+  plotDistK_genes (ec_ko_res , "EC kocked out")
+  plotDistK_genes (fap_wt_res , "FAP wild type")
+  plotDistK_genes (fap_ko_res , "FAP knocked out")
+}
+
+plotDistK_genes <- function(cell_res , title)
+{
+  cell_res %>% unlist() -> cell_res
+  which (cell_res == "NA") -> idx
+  if (length(idx) > 0){
+    cell_res [ -idx] -> cell_res
+  }
+  #cell_res %>% unlist() -> cell_res
+  cell_res[seq(1,length(cell_res), by= 2)] %>% unname() %>% as.numeric() -> cluster_size
+  cell_res[seq(2,length(cell_res), by= 2)] %>% unname() %>% as.numeric() -> gene_size
+  par(mfrow = c(1,2))
+  hist (cluster_size , breaks = 25 , col = "turquoise" , main = title)
+  hist (gene_size , breaks = 25 , col = "lightseagreen" , main = title)
+  
+}
+
+findSmallClusters <- function()
+{
+  # searcgh for symbols that have small size clusters in any pathway in any of 4 cell types
+  #( using ec_wt_res , ec_ko_res , fap_wt_res , fap_ko_res)
+  # visualize their clusters in pdf files
+}
 downstreamGenes <- function (gene_entry , symbol)
 {
   gene_entry_inf <- try(keggGet(gene_entry), silent=TRUE)
@@ -107,7 +153,8 @@ downstreamGenes <- function (gene_entry , symbol)
   
   # for each pathway, have a plot
   #file = "~/Documents/Farnush github/Fabio Rossi/cell cell comunication/receptor_keg_plots/"
-  file = "~/Documents/Farnush github/Fabio Rossi/cell cell comunication/receptor_keg_hclust/"
+  #file = "~/Documents/Farnush github/Fabio Rossi/cell cell comunication/receptor_keg_hclust/"
+  file = "~/Documents/Farnush github/Fabio Rossi/cell cell comunication/receptor_keg_hclust_average/"
   path = paste (file , paste0 (symbol , ".pdf") , sep = "/")
   pdf(file=path)
   EC_wt_res = c ()
@@ -143,8 +190,8 @@ downstreamGenes <- function (gene_entry , symbol)
 #     plot(r4)
   }
   dev.off()
-  list (EC_wt_res , EC_ko_res , FAP_wt_res , FAP_ko_res) -> ret
-  names (ret) <- c ("EC_WT" , "EC_KO" , "FAP_WT" , "FAP_KO")
+  list (EC_wt_res , EC_ko_res , FAP_wt_res , FAP_ko_res , symbol) -> ret
+  names (ret) <- c ("EC_WT" , "EC_KO" , "FAP_WT" , "FAP_KO" , "receptor symbol")
   return (ret)
   #return (gene_entry_pathways_genes)
 }
@@ -199,4 +246,11 @@ PlotCellSpecificKeggPathways ("EC-wt")
 PlotCellSpecificKeggPathways ("EC-ko")
 PlotCellSpecificKeggPathways ("FAP-wt")
 PlotCellSpecificKeggPathways ("FAP-ko")
+
+
+
+
+
+
+
 
