@@ -14,7 +14,8 @@ hierarchical_clustering <- function (genes , table , jj  , title)
     dist_m = 1 - dist
     #dist_m = 1 - abs (dist)
     colnames(dist_m) = rownames(dist_m) = table$tracking_id[Reduce(union , cluster_idx)] %>% as.character()
-    hclust(as.dist( dist_m ) , method  = "average" ) -> res_hclust
+    hclust(as.dist( dist_m ) , method  = "complete" ) -> res_hclust
+    #hclust(as.dist( dist_m ) , method  = "average" ) -> res_hclust
       par(cex=0.4, mar=c(5, 8, 4, 1))
       plot(res_hclust , xlab = "" , main = title , hang = -1)
       abline(h = 0.25, lty = 1 , col = "red")
@@ -28,7 +29,8 @@ hierarchical_clustering <- function (genes , table , jj  , title)
     }
     ret = c (k , dim(dist_m)[1])
     names (ret) = c ("clusters" , "number of genes")
-    return (ret)
+    #return (ret)
+    return (cutree(res_hclust , h = 0.25) )
 }
 
 
@@ -52,4 +54,58 @@ plot(res_hclust , xlab = "")
 cutree(res_hclust , h = 0.4)
 cutree(res_hclust , k = 4)
 
+plotGroupsOfHierarchicalclustering <- function (table , symbol , pathway_idx ,dayNames, jj)
+{
+  which (receptor_symbol == symbol) -> idx
+  (gene_entry = kegg_entries_receptors [idx])
+  (symbol = receptor_symbol[idx])
+  gene_entry_inf <- try(keggGet(gene_entry), silent=TRUE)
+  gene_entry_inf[[1]]$PATHWAY %>% names() %>% unique()-> gene_entry_pathways
+  
+  getPathwayGenesEntrez (gene_entry_pathways [ pathway_idx]) %>% unlist() %>% as.character()-> genes
+  hierarchical_clustering(genes , table , jj , "") -> r
+  r %>% unlist() %>% unique() %>% length() -> k
+  plist = list ()
+  for ( i in 1:k)
+  {
+    which (r == i) %>% names() -> g
+    plotCluster(table , g %>% toupper(), paste("group" , i,sep="-") , dayNames,jj) -> p
+    plist [[i]] <- p
+  }
+  do.call("grid.arrange", c(plist, ncol=3))
+  
+}
 
+# common clusters 38  67 172 231 286 294
+
+kk = 231
+s = symbols[kk] %>% as.character()
+which (receptor_symbol == s) -> i 
+(receptor_symbol[i] -> symbol)
+(idx1 = which (ec_ko_small$receptor_idx == kk))
+(idx2 = which (fap_wt_small$receptor_idx == kk))
+(idx3 = which (fap_ko_small$receptor_idx == kk))
+plotGroupsOfHierarchicalclustering (table = EC_damaged_log_filtered_n , symbol , 
+ec_ko_small$pathway_idx[idx1] , EC_damaged_days,3)
+plotGroupsOfHierarchicalclustering (table = FAP_WT_log_filtered_n_rep1 , symbol , 
+fap_wt_small$pathway_idx[idx2] , FAP_WT_days_rep1,3)
+plotGroupsOfHierarchicalclustering (table = FAP_KO_log_filtered_n_rep1 , symbol , 
+fap_ko_small$pathway_idx[idx3] , FAP_KO_days_rep1,3)
+
+
+plotTemporalPatterns <- function (table, jj , dayNames , smallClusterInf , file)
+{
+  for ( i in 1:length(smallClusterInf$receptor_idx ))
+  {
+    idx <- smallClusterInf$receptor_idx
+    p_idx <- smallClusterInf$pathway_idx
+    symbols[idx[i]] %>% as.character() -> s
+    path = paste (file , paste0 (s , ".pdf") , sep = "/")
+    pdf(file=path)
+    plotGroupsOfHierarchicalclustering (table = table , s , p_idx[i] , dayNames,jj)
+    dev.off()
+  }  
+}
+
+file = "~/Documents/Farnush GitHub/Fabio Rossi/cell cell comunication/fap-wt-smallclusers-TP/"
+plotTemporalPatterns (FAP_WT_log_filtered_n_rep1 , 3, FAP_WT_days_rep1 , fap_wt_small, file)

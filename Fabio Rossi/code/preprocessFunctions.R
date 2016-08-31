@@ -14,7 +14,7 @@ logTransform_standardizeMyTable <- function(table , idx)
   p %>% as.numeric() -> p1
   matrix(p1 , nrow = r , ncol = c) -> t
   log (t + 1) -> t 
-  t.means <- colMeans(t)
+  t.means <- colMeans(t) 
   t.stdevs <- apply(t, 2, sd)
   
   for (i in 1:dim (t)[2])
