@@ -108,4 +108,8 @@ plotTemporalPatterns <- function (table, jj , dayNames , smallClusterInf , file)
 }
 
 file = "~/Documents/Farnush GitHub/Fabio Rossi/cell cell comunication/fap-wt-smallclusers-TP/"
+file = "~/Documents/Farnush GitHub/Fabio Rossi/cell cell comunication/fap-ko-smallclusers-TP/"
 plotTemporalPatterns (FAP_WT_log_filtered_n_rep1 , 3, FAP_WT_days_rep1 , fap_wt_small, file)
+plotTemporalPatterns (FAP_KO_log_filtered_n_rep1 , 3, FAP_KO_days_rep1 , fap_ko_small, file)
+
+
