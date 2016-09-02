@@ -1,5 +1,5 @@
 
-method <- function (table , threshold )
+method <- function (table , threshold , percentile)
 {
   #print (paste ("Analyzing group" , group_number))
   
@@ -27,7 +27,9 @@ method <- function (table , threshold )
       {
         (set <- paste0("set",j)) # clusters[set]
         featuresInSet <- unname (unlist (clusters[set]) )
-        if (all (cor_matrix [ newFeature , featuresInSet] > threshold ) ) 
+        #if (all (cor_matrix [ newFeature , featuresInSet] > threshold ) )
+        (cor_matrix [ newFeature , featuresInSet] > threshold) -> m_res
+        if ( (length(which (m_res))/2) > (percentile * length(featuresInSet) ))
         {
           # if this feature showed high correlation with all features in the set, add it to the set
           print ("inserted")

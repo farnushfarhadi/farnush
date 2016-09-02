@@ -40,7 +40,7 @@ identical(EC_WT$tracking_id , muscleProgenitors_damaged$tracking_id)
   
   # they are labeled by LOWDATA
   
-  apply (EC_WT , 2 , function(x){which(x == "LOWDATA")}) -> EC_WT_ld_idx
+apply (EC_WT , 2 , function(x){which(x == "LOWDATA")}) -> EC_WT_ld_idx
 apply (EC_damaged , 2 , function(x){which(x == "LOWDATA")}) -> EC_damaged_ld_idx
 
 apply (FAP_WT , 2 , function(x){which(x == "LOWDATA")}) -> FAP_WT_ld_idx
