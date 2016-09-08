@@ -29,7 +29,7 @@ method <- function (table , threshold , percentile)
         featuresInSet <- unname (unlist (clusters[set]) )
         #if (all (cor_matrix [ newFeature , featuresInSet] > threshold ) )
         (cor_matrix [ newFeature , featuresInSet] > threshold) -> m_res
-        if ( (length(which (m_res))/2) > (percentile * length(featuresInSet) ))
+        if ( (length(which (m_res))) > (percentile * length(featuresInSet) ))
         {
           # if this feature showed high correlation with all features in the set, add it to the set
           print ("inserted")
@@ -89,7 +89,7 @@ method <- function (table , threshold , percentile)
        geom_point() +
        geom_line(aes(group = as.character(gene))) +
        theme(axis.text.x = element_text(angle = 90, hjust = 1) , legend.position="none") +
-       ggtitle (paste (feature_number , " genes - " ,  paste (title , "original" , sep = "-")) )
+       ggtitle (paste (feature_number , " g-" , title ) )
      
      cluster.means <- apply(t, 1, mean)
      cluster.stdevs <- apply(t, 1, sd)
@@ -108,7 +108,8 @@ method <- function (table , threshold , percentile)
        geom_point() +
        geom_line(aes(group = as.character(gene))) +
        theme(axis.text.x = element_text(angle = 90, hjust = 1) , legend.position="none") +
-       ggtitle (paste (feature_number , " genes - " ,  paste (title , "standardized" , sep = "-")) )
+       ggtitle (paste (feature_number , " g-" ,  title) )
+     #paste (title , "standardized" , sep = "-")
      
      #multiplot(p1 , p2 , rows = 2)
      return (p2)
@@ -126,9 +127,23 @@ method <- function (table , threshold , percentile)
  
  res95_num  %>% order() %>% tail (30) -> idx
  res95_num [idx]
- 
- 
 
+ ###### V2 ################## 
+ method (EC_WT_log_filtered_n_rep1 , 0.8 , 0.7) -> EC_WT_m1_v2_80_70
+ somePDFPath = "~/Farnush/farnush/Fabio Rossi/code/clustering res/method1/v2/EC_WT.pdf"
+ plotTopdf (somePDFPath ,EC_WT_log_filtered_n_rep1 , EC_WT_m1_v2_80_70 , "80%" , 100 , EC_WT_days_rep1 , 3)
+
+ method (EC_damaged_log_filtered_n , 0.8 , 0.7) -> EC_ko_m1_v2_80_70
+ somePDFPath = "~/Farnush/farnush/Fabio Rossi/code/clustering res/method1/v2/EC_KO.pdf"
+ plotTopdf (somePDFPath ,EC_KO_log_filtered_n_rep1 , EC_ko_m1_v2_80_70 , "80%" , 100 , EC_KO_days_rep1 , 3)
+ 
+ method (FAP_WT_log_filtered_n_rep1 , 0.8 , 0.7) -> FAP_WT_m1_v2_80_70
+ somePDFPath = "~/Farnush/farnush/Fabio Rossi/code/clustering res/method1/v2/FAP_WT.pdf"
+ plotTopdf (somePDFPath ,FAP_WT_log_filtered_n_rep1 , FAP_WT_m1_v2_80_70 , "80%" , 100 , FAP_WT_days_rep1 , 3)
+ 
+ method (FAP_KO_log_filtered_n_rep1 , 0.8 , 0.7) -> FAP_KO_m1_v2_80_70
+ somePDFPath = "~/Farnush/farnush/Fabio Rossi/code/clustering res/method1/v2/FAP_KO.pdf"
+ plotTopdf (somePDFPath ,FAP_KO_log_filtered_n_rep1 , FAP_KO_m1_v2_80_70 , "80%" , 100 , FAP_KO_days_rep1 , 3)
  
  method (EC_damaged_log_filtered , 0.90 ) -> res90_notRep
  res90_notRep_num <- sapply(res90_notRep , function(x) {length (x)}) 
@@ -145,7 +160,7 @@ pdf(file=path)
   for (i in num:1)
   {
     print(i)
-    print (plotCluster( table , cluster_res[[  idx[i] ]]  , title , dayNames , jj) )
+    print (plotCluster( table , cluster_res[[  idx[i] ]] %>% toupper() , title , dayNames , jj) )
   }
   dev.off()
 }
@@ -167,6 +182,9 @@ plotCluster(EC_damaged_log , res95_notRep[[tail(idx ,1)]] , "standardized" , 1) 
 plotCluster(EC_damaged_log , res95_notRep[[tail(idx ,1)]] , "original" , 0) -> p
 multiplot(pn , p , cols = 2)
 plotTopdf (somePDFPath ,EC_damaged_log , res95_notRep , "95%" , 100 )
+
+### version 2 of method 
+
 
 #### FAP_damaged
 method (FAP_damaged_log_filtered , 0.90 ) -> res90_FAP_noRep

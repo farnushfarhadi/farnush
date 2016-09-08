@@ -86,7 +86,7 @@ ss_corHeatmap <- function (table , toWrite , names, idx)
   #           col=cols, cexCol=0.7, cexRow=0.55 , margins=c(8,8) , srtCol=45  
   #           , main = toWrite )
   heatmap.2(cor_matrix,  symm=T, scale = NULL , trace="none",  
-            col=cols, cexCol=0.6, cexRow=0.5 , margins=c(5,5) , srtCol=90 , 
+            col=cols, cexCol=0.6, cexRow=0.5 , margins= c (8,8), srtCol=90 , 
             main = toWrite )
   # table[ , - c(1,2)] %>% as.matrix() -> toHeat
   # heatmap.2(t(toHeat), scale = NULL , trace="none",  
@@ -125,7 +125,8 @@ plotExpressionDist <- function (allSamples , t1 , t2)
   as.matrix(allSamples) -> allSamples
   as.numeric(allSamples) -> allSamples
   # the original range is 0 to 1M. hist is nt good so we transform. 
-  log (allSamples + 1) -> allSamples
+  #### CHANGE this when using for anything rather than consensus hierarchical clustering
+  #log (allSamples + 1) -> allSamples
   par (mfrow = c(3 , 1))
   truehist(allSamples , prob = FALSE , main = "gene expression distribution" , 
            xlab="gene expression" , ylab = "density")
@@ -178,7 +179,7 @@ dataQC <- function (table , threshold , percentage , title , names , idx)
   logTransform (table , idx) -> table_log
   filterLowExpressedGenes(table_log , threshold , percentage) -> table_log_filtered 
   QuantileNormalize (table_log_filtered , idx) -> table_log_filtered_n 
-  ss_corHeatmap (table_log_filtered_n , title , names , idx)
+  #ss_corHeatmap (table_log_filtered_n , title , names , idx)
   return(as.data.frame( table_log_filtered_n) )
 }
 
@@ -230,3 +231,21 @@ multiplot <- function(..., plotlist=NULL, file, cols=1, layout=NULL) {
 }
 
 
+stdVector <- function(x) { return ((x - mean(x))/sd(x) )}
+stdRow_table <- function(table , idx)
+{
+  names <- colnames(table)
+  
+  t<- table [,idx:dim(table)[2]]
+  r = dim(t)[1];
+  c = dim(t)[2];
+  t %>% as.matrix() -> p
+  p %>% as.numeric() -> p1
+  matrix(p1 , nrow = r , ncol = c) -> t
+  for (i in 1:r)
+    t[i,] = stdVector(t[i,])
+  
+  cbind (table[,1:(idx-1 )] , t) -> tableFinal
+  colnames(tableFinal) <- names
+  return(tableFinal)
+}

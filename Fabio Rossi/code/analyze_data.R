@@ -4,7 +4,8 @@
 # a change to test for comit
 
 ## LOAD Data from here
-setwd("Fabio Rossi/data/saved in R /")
+
+setwd("Fabio Rossi/data/saved in R/")
 load (file = "EC_WT.RData")
 load (file = "EC_damaged.RData")
 load (file = "FAP_WT.RData")
@@ -97,6 +98,19 @@ muscleProgenitors_damaged_days <- c( "D0" , "D3-1" , "D3-2" ,"D4" , "D5" ,"D6"  
 dataQC (muscleProgenitors_damaged , 0.7 , 1 , "muscleProgenitors KO-quantile normalized" ,muscleProgenitors_damaged_days, 2) -> muscleProgenitors_damaged_log_filtered_n # 9535 8 genes
 inflammatory_WT_days <- c( "D1-1", "D1-2" ,"D2-1" , "D2-2" , "D2-3" , "D3-1" , "D3-2" , "D3-3" , "D4"  ,"D5" ,"D6","D7-1" ,"D7-2" , "D10")
 dataQC (inflammatory_WT , 0.7 , 1 , "inflammatory WT-quantile normalized", inflammatory_WT_days,2) -> inflammatory_WT_log_filtered_n # 2263 15 genes
+
+
+
+##################
+# bulding tables for different cell types 
+EC_WT_log_filtered_n_rep1 = EC_WT_log_filtered_n[ , c(1,2,3,4,7,10,11,12,13,14,16)]
+EC_WT_days_rep1 <- c("D0" , "D2-1" , "D3-1"  , "D4" , "D5" , "D6" , "D7" , "D10-1"  , "D14" )
+EC_KO_log_filtered_n_rep1 = EC_damaged_log_filtered_n
+EC_KO_days_rep1 <- c("D0" , "D1" , "D2" , "D3" , "D5" , "D6" , "D7" , "D10")
+FAP_WT_log_filtered_n_rep1 = FAP_WT_log_filtered_n[ , c(1,2,3,4,5,8,11,13,14,15,16,17)]
+FAP_WT_days_rep1 <- c("D0" ,"D1" , "D2-1" , "D3-1"  , "D4-1" , "D5" , "D6" , "D7" , "D10"  , "D14" )
+FAP_KO_log_filtered_n_rep1 = FAP_damaged_log_filtered_n[ , c(1,2,3,4,5,6,8,9,10,11)]
+FAP_KO_days_rep1 <- c("D0" , "D1" , "D2" , "D3-1" , "D4" , "D5" , "D6"  , "D10")
 
 logTransform (FAP_damaged_noRep) -> FAP_damaged_noRep_log
 filterLowExpressedGenes(FAP_damaged_noRep_log , 0.7 , 1) -> FAP_damaged_noRep_log_filtered # 8394 genes

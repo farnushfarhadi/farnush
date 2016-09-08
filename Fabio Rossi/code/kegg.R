@@ -55,17 +55,6 @@ inflammatory_WT_days <- c( "D1-1", "D1-2" ,"D2-1" , "D2-2" , "D2-3" , "D3-1" , "
 dataQC (inflammatory_WT_id , 0.7 , 1 , "inflammatory WT-quantile normalized", inflammatory_WT_days,3) -> inflammatory_WT_id_log_filtered_n # 2002 15 genes
 
 
-##################
-# bulding tables for different cell types 
-EC_WT_log_filtered_n_rep1 = EC_WT_log_filtered_n[ , c(1,2,3,4,7,10,11,12,13,14,16)]
-EC_WT_days_rep1 <- c("D0" , "D2-1" , "D3-1"  , "D4" , "D5" , "D6" , "D7" , "D10-1"  , "D14" )
-EC_KO_log_filtered_n_rep1 = EC_damaged_log_filtered_n
-EC_KO_days_rep1 <- c("D0" , "D1" , "D2" , "D3" , "D5" , "D6" , "D7" , "D10")
-FAP_WT_log_filtered_n_rep1 = FAP_WT_log_filtered_n[ , c(1,2,3,4,5,8,11,13,14,15,16,17)]
-FAP_WT_days_rep1 <- c("D0" ,"D1" , "D2-1" , "D3-1"  , "D4-1" , "D5" , "D6" , "D7" , "D10"  , "D14" )
-FAP_KO_log_filtered_n_rep1 = FAP_damaged_log_filtered_n[ , c(1,2,3,4,5,6,8,9,10,11)]
-FAP_KO_days_rep1 <- c("D0" , "D1" , "D2" , "D3-1" , "D4" , "D5" , "D6"  , "D10")
-
 
 ### loading receptors and ligands
 setwd("~/Documents/Farnush github/Fabio Rossi/cell cell comunication/")
@@ -87,18 +76,25 @@ i= 1
 receptor_res = c()
 #length(kegg_entries_receptors)
 for (i in 1:length(kegg_entries_receptors))
-{
+{# do the downstream analysis for alll receptors 
+  print (paste ("******", i , sep = ":  "))
   print(kegg_entries_receptors[i])
   print(receptor_symbol[i])
   downstreamGenes(kegg_entries_receptors[i] , receptor_symbol[i] ) -> res
   receptor_res = c (receptor_res , res)
 }
+
+receptor_res_complete_60 <- receptor_res
+receptor_res_average_60 <- receptor_res
 receptor_res_average <- receptor_res
 receptor_res_complete <- receptor_res
 
 setwd ("~/Documents/Farnush GitHub/Fabio Rossi/cell cell comunication/")
+save (receptor_res_average_60 , file = "receptor_keg_hclust_average_60/res.RData")
 save (receptor_res_complete , file = "receptor_keg_hclust/hclust_complete.RData")
 save (receptor_res_average , file = "receptor_keg_hclust_average/hclust_average.RData")
+load
+save (receptor_res_complete_60 , file = "receptor_keg_hclust_complete_60/res.RData")
 load("receptor_keg_hclust/hclust_complete.RData")
 
 
@@ -131,13 +127,16 @@ hierarchicalClusteringAnalysis <- function (cluster_res)
   (findSmallClusters (ec_ko_res , 10) -> ec_ko_small )
   (findSmallClusters (fap_wt_res , 10) -> fap_wt_small )
   (findSmallClusters (fap_ko_res , 10) -> fap_ko_small)
-  intersect( ec_ko_small$receptor_idx %>% unlist() , intersect( fap_wt_small$receptor_idx %>% unlist(),
-  fap_ko_small$receptor_idx %>% unlist() ) )
-  #38  67 172 231 286 294
+  (intersect( ec_ko_small$receptor_idx %>% unlist() , intersect( fap_wt_small$receptor_idx %>% unlist(),
+  fap_ko_small$receptor_idx %>% unlist() ) ) -> seta)
+  (intersect(seta , ec_wt_small$receptor_idx %>% unlist()) -> common)
+  # for average 75 between ec_ko, fap_wt and fap_ko: 38  67 172 231 286 294
+  # for average 60 between all:
+  # 3  24  26  57  64  67  83  86  87 119 131 148 161 203 204 219 274
 }
 
 plotDistK_genes <- function(cell_res , title)
-{
+{ # plots the histogram of cluster size and number of genes in each clustering
   cell_res %>% unlist() -> cell_res
   (which (cell_res == "NA") -> idx)
   if (length(idx) > 0){
@@ -154,7 +153,8 @@ plotDistK_genes <- function(cell_res , title)
 }
 
 findSmallClusters <- function(cell_res , t)
-{
+{ # for a specific cell types, it finds the genes and the corresponding pathways 
+  # that have less than t clusters in 
   # searcgh for symbols that have small size clusters in any pathway in any of 4 cell types
   #( using ec_wt_res , ec_ko_res , fap_wt_res , fap_ko_res)
   # visualize their clusters in pdf files
@@ -180,7 +180,8 @@ findSmallClusters <- function(cell_res , t)
   return(ret)
 }
 downstreamGenes <- function (gene_entry , symbol)
-{
+{# for a given gene, it finds the kegg pathways that have the gene in 
+  # and then cluster them hierarchialy for different cell types
   gene_entry_inf <- try(keggGet(gene_entry), silent=TRUE)
   if ('try-error' %in% class(gene_entry_inf)) {print ("NA")}
   if ('try-error' %in% class(gene_entry_inf)) {return ("NA")}
@@ -193,7 +194,8 @@ downstreamGenes <- function (gene_entry , symbol)
   
   # for each pathway, have a plot
   #file = "~/Documents/Farnush github/Fabio Rossi/cell cell comunication/receptor_keg_plots/"
-  file = "~/Documents/Farnush github/Fabio Rossi/cell cell comunication/receptor_keg_hclust/"
+  #file = "~/Documents/Farnush github/Fabio Rossi/cell cell comunication/receptor_keg_hclust/"
+  file = "~/Farnush/farnush/Fabio Rossi/cell cell comunication/receptor_keg_hclust_average_60/"
   #file = "~/Documents/Farnush github/Fabio Rossi/cell cell comunication/receptor_keg_hclust_average/"
   path = paste (file , paste0 (symbol , ".pdf") , sep = "/")
   pdf(file=path)
