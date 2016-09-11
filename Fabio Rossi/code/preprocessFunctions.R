@@ -145,13 +145,25 @@ plotExpressionDist <- function (allSamples , t1 , t2)
 
 filterLowExpressedGenes <- function(table  , threshold , percentage)
 {
-  if (percentage == 1)
+  # if (percentage == 1)
+  # {
+  #   apply(table[,-c(1,2)], 1, function(x) {all(as.numeric(x)>threshold )}) -> res
+  #   which (res %>% unname() == FALSE ) -> lowIdx
+  #   table [ - lowIdx , ] -> table 
+  #   return (table)
+  # }
+  low_idx = c()
+  for (i in 1:dim(table)[1])
   {
-    apply(table[,-c(1,2)], 1, function(x) {all(as.numeric(x)>threshold )}) -> res
-    which (res %>% unname() == FALSE ) -> lowIdx
-    table [ - lowIdx , ] -> table 
-    return (table)
+    (as.numeric(table[i , - c(1,2)]) > threshold) -> res
+    length(which(res == TRUE)) / length(res) -> s
+    if (s < percentage)
+    {
+      low_idx = c (low_idx , i)
+    }
   }
+  table [ -low_idx, ] -> table
+  return(table)
 }
 
 
@@ -183,6 +195,14 @@ dataQC <- function (table , threshold , percentage , title , names , idx)
   return(as.data.frame( table_log_filtered_n) )
 }
 
+dataQC_ligand <- function (table  , idx)
+{
+  logTransform (table , idx) -> table_log
+  #filterLowExpressedGenes(table_log , threshold , percentage) -> table_log_filtered 
+  QuantileNormalize (table_log , idx) -> table_log_filtered_n 
+  #ss_corHeatmap (table_log_filtered_n , title , names , idx)
+  return(as.data.frame( table_log_filtered_n) )
+}
 
 # Multiple plot function
 #

@@ -152,7 +152,7 @@ plotDistK_genes <- function(cell_res , title)
   
 }
 
-findSmallClusters <- function(cell_res , t)
+findSmallClusters <- function(cell_res , t , consensus)
 { # for a specific cell types, it finds the genes and the corresponding pathways 
   # that have less than t clusters in 
   # searcgh for symbols that have small size clusters in any pathway in any of 4 cell types
@@ -161,13 +161,19 @@ findSmallClusters <- function(cell_res , t)
 #   cell_res %>% unlist() -> cell_res
 #   which (cell_res == "NA") -> idx
 #   if (length(idx) > 0){
-#     cell_res [ -idx] -> cell_res
+#     cell_res [ -idx] -> cell_res  
 #   }
   idx = c() # storing which receptpr has small cluster
   idx_inner = c() # storing which pathway of the receptor has the small cluster
   for (i in 1:length(cell_res))
   {
-    cell_res[[i]] [seq (1 , length(cluster_res[[i]]) , by = 2)] %>% unname() -> cluster_sizes
+    if (consensus)
+    {
+      p = cell_res[[i]] %>% unlist()
+    }else{
+      p = cell_res[[i]]
+    }
+    ( p [seq (1 , length(p) , by = 2)] %>% unname() -> cluster_sizes)
     which (cluster_sizes < t) -> cluster_small_idx
     if (length(cluster_small_idx) > 0)
     {
