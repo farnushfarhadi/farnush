@@ -6,42 +6,82 @@ EC_KO_rep1 = EC_damaged
 EC_KO_days_rep1 <- c("D0" , "D1" , "D2" , "D3" , "D5" , "D6" , "D7" , "D10")
 FAP_WT_rep1 = FAP_WT[ , c(1,2,3,4,5,8,11,13,14,15,16,17)]
 FAP_WT_days_rep1 <- c("D0" ,"D1" , "D2" , "D3"  , "D4" , "D5" , "D6" , "D7" , "D10"  , "D14" )
-FAP_KO_rep1 = FAP_damaged[ , c(1,2,3,4,5,6,8,9,10,11)]
-FAP_KO_days_rep1 <- c("D0" , "D1" , "D2" , "D3" , "D4" , "D5" , "D6"  , "D10")
-
+MP_WT_rep1 = muscleProgenitors_WT[ , c(1,2,3,4,6,7,8)]
+MP_WT_days_rep1 <- c("D1" , "D2" , "D3"  , "D5" , "D7" , "D10"  )
+MP_KO_rep1 = muscleProgenitors_damaged[ , c(1,2,3,5,6,7,8)]
+MP_KO_days_rep1 <- c("D0" , "D3" , "D4" , "D5" , "D6"  , "D10")
+IC_WT_rep1 = inflammatory_WT [ , c(1,2,4,7,10,11,12,13,15)]
+IC_WT_days_rep1 <- c("D1" , "D2" , "D3"  , "D4" , "D5" , "D6" , "D7" , "D10"  )
 # low exp and normalizing
 dataQC (EC_WT_rep1 , 0.7 , 0.5 , "" , EC_WT_days_rep1 , 3) -> EC_WT_rep1_l_f_n #11296 11 genes
 dataQC (EC_KO_rep1 , 0.7 , 0.5 , "" , EC_KO_days_rep1 , 3) -> EC_KO_rep1_l_f_n #11241 10 genes
-dataQC (FAP_WT_rep1 , 0.7 , 0.5 , "" , EC_WT_days_rep1 , 3) -> FAP_WT_rep1_l_f_n #11348 12 genes
-dataQC (FAP_KO_rep1 , 0.7 , 0.5 , "" , EC_WT_days_rep1 , 3) -> FAP_KO_rep1_l_f_n #11084 10 genes
-
+dataQC (FAP_WT_rep1 , 0.7 , 0.5 , "" , FAP_WT_days_rep1 , 3) -> FAP_WT_rep1_l_f_n #11348 12 genes
+dataQC (FAP_KO_rep1 , 0.7 , 0.5 , "" , FAP_KO_days_rep1 , 3) -> FAP_KO_rep1_l_f_n #11084 10 genes
+dataQC (MP_WT_rep1 , 0.7 , 0.5 , "" , MP_WT_days_rep1 , 2) -> MP_WT_rep1_l_f_n #11781 7 genes
+dataQC (MP_KO_rep1 , 0.7 , 0.5 , "" , MP_KO_days_rep1 , 2) -> MP_KO_rep1_l_f_n #11558 7 genes
+dataQC( IC_WT_rep1 , 0.7 , 0.5 , "" , IC_WT_days_rep1 , 2) -> IC_WT_rep1_l_f_n # 10489 9 genes
 # building cells with common genes
 
 EC_WT_rep1_l_f_n$tracking_id %>% as.character() %>% toupper() -> EC_WT_genes
 EC_KO_rep1_l_f_n$tracking_id %>% as.character() %>% toupper() -> EC_KO_genes
 FAP_WT_rep1_l_f_n$tracking_id %>% as.character() %>% toupper() -> FAP_WT_genes
 FAP_KO_rep1_l_f_n$tracking_id %>% as.character() %>% toupper() -> FAP_KO_genes
+MP_WT_rep1_l_f_n$tracking_id %>% as.character() %>% toupper() -> MP_WT_genes
+MP_KO_rep1_l_f_n$tracking_id %>% as.character() %>% toupper() -> MP_KO_genes
+IC_WT_rep1_l_f_n$tracking_id %>% as.character() %>% toupper() -> IC_WT_genes
 
-intersect(EC_WT_genes , intersect(EC_KO_genes , intersect(FAP_WT_genes , FAP_KO_genes))) -> common_genes
-# 9961 genes
+
+intersect(EC_WT_genes , intersect(EC_KO_genes , 
+         intersect(FAP_WT_genes , 
+         intersect (FAP_KO_genes , 
+         intersect (MP_WT_genes , 
+         intersect (MP_KO_genes , IC_WT_genes)))) )) -> common_genes
+# 9961 genes for FAP and EC
+# 8988 for all 
 
 getTableWithCommonGenes <- function(table , common_genes)
 {
   table$tracking_id %>% as.character() %>% toupper() -> genes
   sapply(common_genes, function(x){which (genes == x)}) -> idx
-  return (table [Reduce(union , idx), ])
+#   idx = c()
+#   for (i in 1:length(common_genes))
+#   {
+#     which(genes)
+#   }
+  #return (table [Reduce(union , idx), ])
+  return(Reduce(union , idx))
 }
 
 # 9998 genes
-getTableWithCommonGenes (EC_WT_rep1_l_f_n , common_genes) -> EC_WT_rep1_l_f_n_c
-getTableWithCommonGenes (EC_KO_rep1_l_f_n , common_genes) -> EC_KO_rep1_l_f_n_c
-getTableWithCommonGenes (FAP_WT_rep1_l_f_n , common_genes) -> FAP_WT_rep1_l_f_n_c
-getTableWithCommonGenes (FAP_KO_rep1_l_f_n , common_genes) -> FAP_KO_rep1_l_f_n_c
+# 8988 for all 
+# getTableWithCommonGenes (EC_WT_rep1_l_f_n , common_genes) -> EC_WT_rep1_l_f_n_c
+# getTableWithCommonGenes (EC_KO_rep1_l_f_n , common_genes) -> EC_KO_rep1_l_f_n_c
+# getTableWithCommonGenes (FAP_WT_rep1_l_f_n , common_genes) -> FAP_WT_rep1_l_f_n_c
+# getTableWithCommonGenes (FAP_KO_rep1_l_f_n , common_genes) -> FAP_KO_rep1_l_f_n_c
+# getTableWithCommonGenes (MP_WT_rep1_l_f_n , common_genes) -> MP_WT_rep1_l_f_n_c
+# getTableWithCommonGenes (MP_KO_rep1_l_f_n , common_genes) -> MP_KO_rep1_l_f_n_c
+getTableWithCommonGenes (IC_WT_rep1_l_f_n , common_genes) -> IC_WT_rep1_l_f_n_c_idx
+# since they change in size , I use the IC (some ha s 9018 and some has 9019)
+EC_WT_rep1_l_f_n[IC_WT_rep1_l_f_n_c_idx , ] -> EC_WT_rep1_l_f_n_c
+EC_KO_rep1_l_f_n[IC_WT_rep1_l_f_n_c_idx , ] -> EC_KO_rep1_l_f_n_c
+FAP_WT_rep1_l_f_n [ IC_WT_rep1_l_f_n_c_idx, ] -> FAP_WT_rep1_l_f_n_c
+FAP_KO_rep1_l_f_n [ IC_WT_rep1_l_f_n_c_idx , ] -> FAP_KO_rep1_l_f_n_c
+MP_WT_rep1_l_f_n [ IC_WT_rep1_l_f_n_c_idx , ] -> MP_WT_rep1_l_f_n_c
+MP_KO_rep1_l_f_n [ IC_WT_rep1_l_f_n_c_idx , ] -> MP_KO_rep1_l_f_n_c
+IC_WT_rep1_l_f_n [ IC_WT_rep1_l_f_n_c_idx , ] -> IC_WT_rep1_l_f_n_c
+# 9018 after all (for genes copy)  (8988)
+
+
 first_two <- c ("tracking_id" , "locus")
 colnames(EC_WT_rep1_l_f_n_c) = c (first_two , EC_WT_days_rep1)
 colnames(EC_KO_rep1_l_f_n_c) = c (first_two , EC_KO_days_rep1)
 colnames(FAP_WT_rep1_l_f_n_c) = c (first_two , FAP_WT_days_rep1)
 colnames (FAP_KO_rep1_l_f_n_c) = c (first_two , FAP_KO_days_rep1)
+colnames(MP_WT_rep1_l_f_n_c) = c(first_two[1] , MP_WT_days_rep1)
+colnames(MP_KO_rep1_l_f_n_c) = c(first_two[1] , MP_KO_days_rep1)
+colnames(IC_WT_rep1_l_f_n_c) = c(first_two[1] , IC_WT_days_rep1)
+
+
 # QuantileNormalize (EC_WT_log_c , 3) -> EC_WT_log_c_n 
 # QuantileNormalize (EC_KO_log_c , 3) -> EC_KO_log_c_n 
 # QuantileNormalize (FAP_WT_log_c , 3) -> FAP_WT_log_c_n 
@@ -118,7 +158,7 @@ consensus_hclust <- function (genes , avg)
       dist <- (dist_ec_wt + dist_ec_ko + dist_fap_wt + dist_fap_ko)/4
       dist_m = 1 - dist
       #dist_m = 1 - abs (dist)
-      colnames(dist_m) = rownames(dist_m) = EC_WT_log_c_n$tracking_id[Reduce(union , cluster_idx)] %>% as.character()
+      colnames(dist_m) = rownames(dist_m) = EC_WT_rep1_l_f_n_c$tracking_id[Reduce(union , cluster_idx)] %>% as.character()
       if (avg)
       {
         hclust(as.dist( dist_m ) , method  = "average" ) -> res_hclust  
@@ -143,17 +183,18 @@ consensus_hclust <- function (genes , avg)
     num = 2;
     k_ = 1;
     #return(list (colnames(dist_m)))
-    return (list (unlist(cluster_idx) ))
+    #return (list (unlist(cluster_idx) ))
   }
   
-  #ret = c (k_ , num)
-  #names (ret) = c ("clusters" , "number of genes")
+  ret = c (k_ , num)
+  names (ret) = c ("clusters" , "number of genes")
   # when plotting return cutree O.W. return ret
-  #return (list (ret) )
-  return (list (cutree(res_hclust , h = 0.4) ) )
+  return (list (ret) )
+  #return (list (cutree(res_hclust , h = 0.4) ) )
 }
 
 file = "~/Farnush/farnush/Fabio Rossi/cell cell comunication/consensus clustering/average 60/"
+file = "~/Documents/Farnush GitHub/Fabio Rossi/cell cell comunication/consensus clustering/average 60/"
 #length(kegg_entries_receptors)
 res = list()
 names = c()
@@ -175,7 +216,7 @@ hierarchicalClusteringAnalysis <- function (cluster_res)
   
   (which (cluster_res == "NA") %>% unname() -> idx)
   cluster_res [ -idx] -> cluster_res
-  plotDistK_genes (cluster_res , "FAP EC")
+  plotDistK_genes (cluster_res , "")
   (findSmallClusters (cluster_res , 5 , 1) -> c_small)
   
 }
@@ -197,7 +238,8 @@ makeTableOfClusteringRes <- function (all_inf_res)
       for ( k in 1:K)
       {
         (which (r == k) %>% names() -> g)
-        toWrite = rbind (toWrite , c ( recep_name, path , paste(g, collapse = ",")))
+        if (length(g) > 2)
+          toWrite = rbind (toWrite , c ( recep_name, path , paste(g, collapse = ",")))
         #plotCluster(table , g %>% toupper(), paste(i , cellType,sep = "/") , dayNames,jj) -> p
         #plist [[i]] <- p
       }     
@@ -205,8 +247,11 @@ makeTableOfClusteringRes <- function (all_inf_res)
   }
   colnames(toWrite) = c ("receptor" , "pathway_id" , "genes_in_cluster")
   
-  write.table(toWrite , file = "consensus clustering/average 60/table_clustering.txt" ,row.names = FALSE)
+  write.table(toWrite , file = "consensus clustering/average 60/table_clustering_atleast3.txt" ,row.names = FALSE)
 }
+
+
+makeTableOfClusteringRes (res)
 
 # 
 # # prepare cells for finding the ligand 
@@ -217,6 +262,8 @@ makeTableOfClusteringRes <- function (all_inf_res)
 
 read.delim("interactions.txt" , header = TRUE) -> interactions
 read.table (file = "consensus clustering/average 60/table_clustering.txt" , header = TRUE) -> rec_path_clusters
+read.table (file = "consensus clustering/average 60/table_clustering_atleast2.txt" , header = TRUE) -> rec_path_clusters
+
 
 cellToCell_ligand_clusters <- function(th)
 {
@@ -224,36 +271,56 @@ cellToCell_ligand_clusters <- function(th)
   list_i = 1
   khar = 1
   cellTypes <- c ("EC_WT" , "EC_KO" , "FAP_WT" , "FAP_KO")
-  for (i in 1: dim(interactions)[1])
+  #dim(interactions)[1]
+  for (i in 401: 878)
   {
     (interactions[i, ]$ligand_symbol %>% as.character() -> li)
     (interactions[i, ]$receptor_symbol %>% as.character() -> rec)
     (which (rec_path_clusters$receptor == rec ) -> rec_idx_table)
-    rec_path_clusters$genes_in_cluster [ rec_idx_table ] -> clusters
-    for (j in 1:length(clusters))
+    if (length(rec_idx_table) > 0)
     {
-      (strsplit(clusters[j] %>% as.character() , ",") %>% unlist() -> cluster_symbol)
-      for (j1 in 1:length(cellTypes))
-      {# cluster cell
-        for (j2 in 1: length(cellTypes))
-        {# li cell
-          print (paste (j, paste (j1 , j2 , sep = ":") , sep = ":") )
-          (s <- corLigand_cluster ( cluster_symbol , li %>% toupper() , cellTypes[j1] , cellTypes[j2] ))
-          if (s >= th)
-          {
-            print (s)
-            khar = khar + 1
-            plist [[list_i]] <- c (li ,cellTypes[j2], rec , clusters[j] %>% as.character() , cellTypes[j1], s)
-            print (paste0(c (li ,cellTypes[j2], rec , clusters[j] %>% as.character() , cellTypes[j1], s)))
-            list_i = list_i + 1
-          }
+      rec_path_clusters$genes_in_cluster [ rec_idx_table ] -> clusters
+      rec_path_clusters$pathway_id [ rec_idx_table ] -> paths
+      #print (i)
+      for (j in 1:length(clusters))
+      {
+        
+        (strsplit(clusters[j] %>% as.character() , ",") %>% unlist() -> cluster_symbol)
+        if (length(cluster_symbol) > 0 )
+        {# not recording the group with only one gene
+          for (j1 in 1:length(cellTypes))
+          {# cluster cell
+            for (j2 in 1: length(cellTypes))
+            {# li cell
+              #print (paste (j, paste (j1 , j2 , sep = ":") , sep = ":") )
+              (s <- corLigand_cluster ( cluster_symbol , li %>% toupper() , cellTypes[j1] , cellTypes[j2] ))
+              if (s >= th)
+              {
+                print (s)
+                print (paste ( i , j , sep = ":"))
+                khar = khar + 1
+                plist [[list_i]] <- c (li ,cellTypes[j2], rec , clusters[j] %>% as.character() , cellTypes[j1],paths[j] %>% as.character(), s)
+                #print (paste0(c (li ,cellTypes[j2], rec , clusters[j] %>% as.character() , cellTypes[j1], s)))
+                list_i = list_i + 1
+              }
+            }
+          } 
         }
-      }
+      } 
     }
   }
-
+  return (plist)
   # test if clusters and the ligand would correlate
 }
+
+cellToCell_ligand_clusters (0.6) -> cell_cell_06
+#cellToCell_ligand_clusters (0.8) -> cell_cell_08_part2
+#cellToCell_ligand_clusters (0.8) -> cell_cell_08_ta800
+#cell_cell_08_ta400 <- c (cell_cell_08 , cell_cell_08_part2)
+cell_cell_08 = c (cell_cell_08_ta400 , cell_cell_08_ta800)
+save (cell_cell_08_ta400 , file = "consensus clustering/average 60/ligand_downstream_ta400.RData")
+
+
 findSymbol <- function (symbol, table)
 {
   which (table$tracking_id %>% toupper() == symbol) -> idx
@@ -308,32 +375,87 @@ corLigand_cluster <- function ( cluster_symbol , ligand_symbol , cluster_cell , 
   {
     (which (EC_WT_rep1_l_f_n_c$tracking_id %>% toupper() == ligand_symbol) -> idx)
     if (length(idx) == 0)
-      return ("NA")
+      return (-1)
     EC_WT_rep1_l_f_n_c [idx , - c(1,2)] %>% as.matrix() -> ligand_exp 
   } else if (ligand_cell == "EC_KO"){
     (which (EC_KO_rep1_l_f_n_c$tracking_id %>% toupper() ==ligand_symbol) -> idx)
     if (length(idx) == 0)
-      return ("NA")
+      return (-1)
     EC_KO_rep1_l_f_n_c [idx , - c(1,2)] %>% as.matrix() -> ligand_exp
   } else if (ligand_cell == "FAP_WT"){
     (which (FAP_WT_rep1_l_f_n_c$tracking_id %>% toupper() ==ligand_symbol) -> idx)
     if (length(idx) == 0)
-      return ("NA")
+      return (-1)
     FAP_WT_rep1_l_f_n_c [idx , - c(1,2)] %>% as.matrix() -> ligand_exp
   } else if (ligand_cell == "FAP_KO"){
     (which (FAP_KO_rep1_l_f_n_c$tracking_id %>% toupper() ==ligand_symbol) -> idx)
     if (length(idx) == 0)
-      return ("NA")
+      return (-1)
     FAP_KO_rep1_l_f_n_c [ idx , - c (1,2)] %>% as.matrix() -> ligand_exp
   } else {
       print ("Wrong ligand cell")
-      return ("NA")
+      return (-1)
   }
   
   (cor_score <- corTwoTablesByCommonCols (cluster_exp , ligand_exp ))
   return(abs (cor_score) )
     
 }
+
+l = c()
+for (i in 1: length(cell_cell_08))
+{
+  strsplit(cell_cell_08 [[i]] [4] , ",") %>% unlist %>% length() -> cluster_l
+  l = c ( l , cluster_l)
+}
+hist(l[which(l>5)] , breaks = 50 , col = "green" )
+hist(l[which(3<l)] , breaks = 50 , col = "green" )
+which(l==2) %>% length()
+which(l>10) %>% length()
+which(l>15) %>% length()
+
+which (l >10) -> l10
+pdf (file = "consensus clustering/average 60/li_clusters_80_original.pdf")
+for (i in 1: length(l10) )
+{
+  # c (li ,cellTypes[j2], rec , clusters[j] %>% as.character() , cellTypes[j1],paths[j] %>% as.character(), s)
+  (cell_cell_08_ta400[[l10[i]]] -> c)
+  cluster <- strsplit(c[4] , ",") %>% unlist() %>% toupper()
+li <- c[1] %>% toupper()
+  if (c[2] == "EC_WT")
+  {
+    table_l = EC_WT_rep1_l_f_n_c
+    days_l = EC_WT_days_rep1
+  }else if (c[2] == "EC_KO"){
+    table_l = EC_KO_rep1_l_f_n_c
+    days_l = EC_KO_days_rep1
+  }else if (c[2] == "FAP_WT"){
+    table_l = FAP_WT_rep1_l_f_n_c
+    days_l = FAP_WT_days_rep1
+  }else {
+    table_l = FAP_KO_rep1_l_f_n_c
+    days_l = FAP_KO_days_rep1
+  } 
+  
+  if (c[5] == "EC_WT")
+  {
+    table_c = EC_WT_rep1_l_f_n_c
+    days_c = EC_WT_days_rep1
+  }else if (c[5] == "EC_KO"){
+    table_c = EC_KO_rep1_l_f_n_c
+    days_c = EC_KO_days_rep1
+  }else if (c[5] == "FAP_WT"){
+    table_c = FAP_WT_rep1_l_f_n_c
+    days_c = FAP_WT_days_rep1
+  }else {
+    table_c = FAP_KO_rep1_l_f_n_c
+    days_c = FAP_KO_days_rep1
+  }
+  plotCluster(table_c ,  cluster, paste (c[3] , c[5], sep = "/") , days_c , 3) -> p1
+  plotCluster(table_l ,  li, paste (c[1] , c[2] , sep = "/") , days_l , 3) -> p2
+  multiplot(p1 , p2 , cols =1 )
+}
+dev.off()
 # jj = 3
 # 
 # cor (t(as.matrix(all_EC_FAP_rep1_log_std_filtered_n[ , -c(1:(jj-1))]) ) , 

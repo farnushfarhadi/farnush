@@ -45,8 +45,8 @@ hist (EC_WT_log$Endothelium.0D.NTX)
 
 
 # - Question: finding low expressed genes with the distribution. - all samples 
-cbind (EC_WT[ , -c(1,2)] , EC_damaged[ , -c(1,2)] , FAP_WT[,-c(1,2)] , FAP_damaged[,-c(1,2)] , 
-inflammatory_WT[,-1] , muscleProgenitors_WT[,-1] , muscleProgenitors_damaged[,-1]) -> allSamples
+  cbind (EC_WT[ , -c(1,2)] , EC_damaged[ , -c(1,2)] , FAP_WT[,-c(1,2)] , FAP_damaged[,-c(1,2)] , 
+  inflammatory_WT[,-1] , muscleProgenitors_WT[,-1] , muscleProgenitors_damaged[,-1]) -> allSamples
 
 
 plotExpressionDist (allSamples , 0.3 , 0.7)
@@ -85,19 +85,19 @@ muscleProgenitors_damaged_noRep[ , -4] -> muscleProgenitors_damaged_noRep
 
 # - Question: preprocessing  data
 EC_WT_days <- c("D0" , "D2-1" , "D2-2" , "D2-3" , "D3-1" , "D3-2" , "D3-3" , "D4" , "D5" , "D6" , "D7" , "D10-1" , "D10-2" , "D14" )
-dataQC (EC_WT , 0.7 , 1 , "EC WT-quantile normalized" , EC_WT_days , 3) -> EC_WT_log_filtered_n # 9396 16 genes
+dataQC (EC_WT , 0.7 , 0.5 , "EC WT" , EC_WT_days , 3) -> EC_WT_log_filtered_n # 9396 16 genes
 EC_damaged_days <- c("D0" , "D1" , "D2" , "D3" , "D5" , "D6" , "D7" , "D10")
-dataQC (EC_damaged , 0.7 , 1 , "EC KO-quantile normalized" , EC_damaged_days , 3) -> EC_damaged_log_filtered_n # 9025 10 genes
+dataQC (EC_damaged , 0.7 , 0.5 , "EC KO" , EC_damaged_days , 3) -> EC_damaged_log_filtered_n # 9025 10 genes
 FAP_WT_days <- c("D0" , "D1" , "D2-1" , "D2-2" , "D2-3" , "D3-1" , "D3-2" , "D3-3" , "D4-1" , "D4-2" , "D5" , "D6" , "D7" , "D10" , "D14" )
-dataQC (FAP_WT , 0.7 , 1 , "FAP WT-quantile normalized" , FAP_WT_days , 3) -> FAP_WT_log_filtered_n # 8909 17 genes
+dataQC (FAP_WT , 0.7 , 0.5 , "FAP WT" , FAP_WT_days , 3) -> FAP_WT_log_filtered_n # 8909 17 genes
 FAP_damaged_days <- c("D0" , "D1" , "D2" , "D3-1" , "D3-2" , "D4" , "D5" , "D6"  , "D10")
-dataQC (FAP_damaged , 0.7 , 1 , "FAP KO-quantile normalized" , FAP_damaged_days ,3) -> FAP_damaged_log_filtered_n # 8341 10 genes
+dataQC (FAP_damaged , 0.7 , 0.5 , "FAP KO" , FAP_damaged_days ,3) -> FAP_damaged_log_filtered_n # 8341 10 genes
 muscleProgenitors_WT_days <- c( "D1" , "D2" , "D3-1" , "D3-2" , "D5" ,  "D7"  , "D10")
-dataQC (muscleProgenitors_WT , 0.7 , 1 , "muscleProgenitors WT-quantile normalized", muscleProgenitors_WT_days,2) -> muscleProgenitors_WT_log_filtered_n # 9014 8 genes
+dataQC (muscleProgenitors_WT , 0.7 , 1 , "muscleProgenitors WT", muscleProgenitors_WT_days,2) -> muscleProgenitors_WT_log_filtered_n # 9014 8 genes
 muscleProgenitors_damaged_days <- c( "D0" , "D3-1" , "D3-2" ,"D4" , "D5" ,"D6"  , "D10")
-dataQC (muscleProgenitors_damaged , 0.7 , 1 , "muscleProgenitors KO-quantile normalized" ,muscleProgenitors_damaged_days, 2) -> muscleProgenitors_damaged_log_filtered_n # 9535 8 genes
+dataQC (muscleProgenitors_damaged , 0.7 , 1 , "muscleProgenitors KO" ,muscleProgenitors_damaged_days, 2) -> muscleProgenitors_damaged_log_filtered_n # 9535 8 genes
 inflammatory_WT_days <- c( "D1-1", "D1-2" ,"D2-1" , "D2-2" , "D2-3" , "D3-1" , "D3-2" , "D3-3" , "D4"  ,"D5" ,"D6","D7-1" ,"D7-2" , "D10")
-dataQC (inflammatory_WT , 0.7 , 1 , "inflammatory WT-quantile normalized", inflammatory_WT_days,2) -> inflammatory_WT_log_filtered_n # 2263 15 genes
+dataQC (inflammatory_WT , 0.7 , 0.5  , "inflammatory WT", inflammatory_WT_days,2) -> inflammatory_WT_log_filtered_n # 2263 15 genes
 
 
 
@@ -119,12 +119,12 @@ QuantileNormalize (FAP_damaged_noRep_log_filtered) -> l
 #heatmap of all samples 
 cbind (EC_WT[, c(1,2)] , allSamples) -> allSamplestoHeat
 logTransform(allSamplestoHeat , 3) -> allSamplestoHeat_log
-filterLowExpressedGenes(allSamplestoHeat_log , 0.7 , 1) -> allSamplestoHeat_filtered # 2263 15 genes
-QuantileNormalize (allSamplestoHeat_filtered) -> allSamplestoHeat_filtered_n 
+filterLowExpressedGenes(allSamplestoHeat_log , 0.7 , 1 , 3) -> allSamplestoHeat_filtered # 2263 15 genes
+QuantileNormalize (allSamplestoHeat_filtered , 3) -> allSamplestoHeat_filtered_n 
 allSamples_names = c(paste("EC_WT",EC_WT_days),paste("EC_KO",EC_damaged_days),
                      paste("FAP_WT",FAP_WT_days),paste("FAP_WT",FAP_damaged_days),
-                     paste("ifml_WT",inflammatory_WT_days),
-                     paste("mus_WT",muscleProgenitors_WT_days),paste("mus_KO",muscleProgenitors_damaged_days))
+                     paste("IC_WT",inflammatory_WT_days),
+                     paste("MP_WT",muscleProgenitors_WT_days),paste("mus_KO",muscleProgenitors_damaged_days))
 ss_corHeatmap (allSamplestoHeat_filtered_n , "all samples-quantile normalized" ,allSamples_names,3)
 
 sample <- allSamplestoHeat_filtered_n[, - c(1,2)]

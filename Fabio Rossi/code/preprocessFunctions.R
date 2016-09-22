@@ -74,29 +74,28 @@ failHandler <- function (table)
 
 ss_corHeatmap <- function (table , toWrite , names, idx)
 {
-  cor_matrix <- cor (table [ , idx:dim(table)[2]] , table [ , idx:dim(table)[2]])
+  table [ , idx:dim(table)[2]] -> t
+  r = dim(t)[1];
+  c = dim(t)[2];
+  t %>% as.matrix() -> p
+  p %>% as.numeric() -> p1
+  matrix(p1 , nrow = r , ncol = c) -> t
+  cor_matrix <- cor (t , t)
   #cor_matrix <- cor (t(table [ , idx:dim(table)[2]] ), t(table [ , idx:dim(table)[2]]) )
   colnames(cor_matrix) = rownames(cor_matrix) = names
   diag(cor_matrix) <- NA
   cols<-c(rev(brewer.pal(9,"YlOrRd")), "#FFFFFF")
   #cols<-colorRampPalette(brewer.pal(9,"Greens"))
   #cols<-colorRampPalette(brewer.pal(9,"Greens"))
-  par(cex.main=0.8)
+  #par(cex.main=0.7)
   # heatmap.2(cor_matrix, Rowv=NA, Colv=NA, symm=T, scale = NULL , trace="none", dendrogram="none", 
   #           col=cols, cexCol=0.7, cexRow=0.55 , margins=c(8,8) , srtCol=45  
   #           , main = toWrite )
-  heatmap.2(cor_matrix,  symm=T, scale = NULL , trace="none",  
-            col=cols, cexCol=0.6, cexRow=0.5 , margins= c (8,8), srtCol=90 , 
+  margins = c(12, 12)
+  par(cex.main=0.7)
+  heatmap.2(cor_matrix,  scale = NULL , trace="none",  dendrogram = "column" ,
+            col=cols, cexCol=1, cexRow=1 , margins= c (8,8), srtCol=90 , 
             main = toWrite )
-  # table[ , - c(1,2)] %>% as.matrix() -> toHeat
-  # heatmap.2(t(toHeat), scale = NULL , trace="none",  
-  #           col=cols, cexCol=0.6, cexRow=0.5 , margins=c(5,5) , srtCol=90 , 
-  #           main = toWrite )
-  #heatmap.2(cor_matrix , col=cols, cexCol=0.7, cexRow=0.55 , margins=c(8,8) , srtCol=45 , scale = NULL)
-  
-  #heatmap.2(cor_matrix,  symm=T, scale = NULL , trace="none", 
-  #         col=cols, cexCol=0.7, cexRow=0.55 , margins=c(8,8) , srtCol=45  
-  #          , main = toWrite )
 } 
 read.table("../../elana/exmaple 2/group1.txt" , header = FALSE) %>% unlist() -> g 
 read.table("../../elana/exmaple 2/group2.txt" , header = FALSE) %>% unlist() %>% unname() -> g1
@@ -143,7 +142,7 @@ plotExpressionDist <- function (allSamples , t1 , t2)
   axis(side=1, at=c(0:10 , by = 1))
 }
 
-filterLowExpressedGenes <- function(table  , threshold , percentage)
+filterLowExpressedGenes <- function(table  , threshold , percentage , idx)
 {
   # if (percentage == 1)
   # {
@@ -155,7 +154,7 @@ filterLowExpressedGenes <- function(table  , threshold , percentage)
   low_idx = c()
   for (i in 1:dim(table)[1])
   {
-    (as.numeric(table[i , - c(1,2)]) > threshold) -> res
+    (as.numeric(table[i , - c(1:(idx-1) )]) > threshold) -> res
     length(which(res == TRUE)) / length(res) -> s
     if (s < percentage)
     {
@@ -189,9 +188,9 @@ QuantileNormalize <- function (table , idx)
 dataQC <- function (table , threshold , percentage , title , names , idx)
 {
   logTransform (table , idx) -> table_log
-  filterLowExpressedGenes(table_log , threshold , percentage) -> table_log_filtered 
+  filterLowExpressedGenes(table_log , threshold , percentage , idx) -> table_log_filtered 
   QuantileNormalize (table_log_filtered , idx) -> table_log_filtered_n 
-  #ss_corHeatmap (table_log_filtered_n , title , names , idx)
+  ss_corHeatmap (table_log_filtered_n , title , names , idx)
   return(as.data.frame( table_log_filtered_n) )
 }
 

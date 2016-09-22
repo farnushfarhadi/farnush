@@ -148,7 +148,7 @@ plotDistK_genes <- function(cell_res , title)
   par(mfrow = c(1,2))
   hist (cluster_size , breaks = 25 , col = "turquoise" , main = title)
   hist (gene_size , breaks = 25 , col = "lightseagreen" , main = title)
-  return (mean (cluster_size))
+  return (c(mean (cluster_size) , mean (gene_size)) )
   
 }
 
@@ -184,6 +184,25 @@ findSmallClusters <- function(cell_res , t , consensus)
   ret = list (idx , idx_inner)
   names (ret) <- c ("receptor_idx" , "pathway_idx")
   return(ret)
+}
+
+all_path <- c()
+for ( i in 1: length(kegg_entries_receptors))
+{
+  gene_entry_inf <- try(keggGet(kegg_entries_receptors[i]), silent=TRUE)
+  if ('try-error' %in% class(gene_entry_inf)) {
+    print ("NA")
+  } else {
+    gene_entry_inf[[1]]$PATHWAY %>% names() %>% unique()-> gene_entry_pathways
+    }
+  #if ('try-error' %in% class(gene_entry_inf)) {return ("NA")}
+  
+  if (gene_entry_pathways %>% length() == 0) {print ("NA")
+  }else {
+    all_path = c(all_path , gene_entry_pathways)
+    }
+  #if (gene_entry_pathways %>% length() == 0) {return ("NA")}
+  
 }
 downstreamGenes <- function (gene_entry , symbol)
 {# for a given gene, it finds the kegg pathways that have the gene in 
