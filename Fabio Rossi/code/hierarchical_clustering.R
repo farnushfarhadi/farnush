@@ -1,4 +1,4 @@
-hierarchical_clustering <- function (genes , table , jj  , title)
+hierarchical_clustering <- function (genes , table , jj  , title , t2)
 {
   #genes <- genes %>% unlist() %>% unname()
   genes_2 <- 0
@@ -24,7 +24,7 @@ hierarchical_clustering <- function (genes , table , jj  , title)
       # 1.2 , 2 - 1.1 , 1.9 - 1 , 1.8
       text(1.4, 1.2 , paste ("clusters:" ,k, sep = " ") , col = "red")
       abline(h = 0.4, lty = 1 , col = "blue")
-      cutree(res_hclust , h = 0.4) %>% unlist() %>% unique() %>% length() -> k_
+      cutree(res_hclust , h = t2) %>% unlist() %>% unique() %>% length() -> k_
       text(1.4, 1.1 , paste ("clusters:" ,k_, sep = " ") , col = "blue")
       text(1.4, 1 , paste ("number of genes:" ,dim(dist_m)[1], sep = " ") , col = "mediumorchid4")
       num = dim(dist_m)[1]
@@ -38,13 +38,49 @@ hierarchical_clustering <- function (genes , table , jj  , title)
     ret = c (k_ , num)
     names (ret) = c ("clusters" , "number of genes")
     # when plotting return cutree O.W. return ret
-    return (ret)
-    #return (cutree(res_hclust , h = 0.4) )
+    #return (ret)
+    return (cutree(res_hclust , h = t2) )
 }
 
+plotClustersspecificReceptorPathway_cell <- function ( table,cellType, pathway , jj , t , dayNames , ge , cons)
+{ # visualize a specific pathway clusters in a specific cell 
+  if (pathway != "0")
+  {
+    getPathwayGenesEntrez(pathway) -> ge
+    ge[,1] %>% as.character() -> ge
+  }
 
-# cutree(tree, k = NULL, h = NULL)
+  if (cons)
+  {
+    consensus_hclust(ge , 1, t = t) %>% unlist () -> r
+  }else {
+    hierarchical_clustering(ge , table , jj , "" , t) -> r
+  }
+  print (head(r))
+  print (length(ge))
+  print (length(r) )
+  (r %>% unlist() %>% unique() %>% length() -> k)
+  plist = list ()
+  for ( i in 1:k)
+  {
+    which (r == i) %>% names() -> g
+    plotCluster(table , g %>% toupper(), paste(i , cellType,sep = "/") , dayNames,jj) -> p
+    plist [[i]] <- p
+  }
+  print (k)
+  do.call("grid.arrange", c(plist, ncol=3))
+}
 
+plotClustersspecificReceptorPathway_cell (FAP_KO_rep1_l_f_n_c , "FAP_ko", "mmu04512" , 3, 0.6 , FAP_KO_days_rep1 ,cons = 0)
+plotClustersspecificReceptorPathway_cell (FAP_WT_rep1_l_f_n_c , "FAP_wt", "mmu04512" , 3, 0.6 , FAP_WT_days_rep1 ,cons = 0)
+plotClustersspecificReceptorPathway_cell (EC_WT_rep1_l_f_n_c , "EC_wt", "mmu04512" , 3, 0.6 , EC_WT_days_rep1 ,cons = 0)
+plotClustersspecificReceptorPathway_cell (FAP_WT_rep1_l_f_n_c , "fap-ec", "mmu04512" , 3, 0.6 , FAP_WT_days_rep1 ,cons = 1)
+plotClustersspecificReceptorPathway_cell (EC_WT_rep1_l_f_n_c , "EC_wt", "mmu04512" , 3, 0.6 , EC_WT_days_rep1 ,cons = 1)
+plotClustersspecificReceptorPathway_cell (EC_WT_rep1_l_f_n , "EC_wt", "mmu04974" , 3, 0.7 , EC_WT_days_rep1 )
+plotClustersspecificReceptorPathway_cell (EC_WT_rep1_l_f_n , "EC_wt", "mmu04060" , 3, 0.6 , EC_WT_days_rep1 )
+plotClustersspecificReceptorPathway_cell (EC_WT_rep1_l_f_n , "EC_wt", "0" , 3, 0.6 , EC_WT_days_rep1 , genes)
+ # cutree(tree, k = NULL, h = NULL)
+##### NATIJE: ta 0.6 .7 ham kheili khube ama vaghti co-cluster mikonim kheili tedade cluster ha alaki bala mire 
 #testing 
 i = 4
 strsplit (t [i , 3] %>% as.character() ,";" ) %>% unlist() %>% toupper() -> cluster
