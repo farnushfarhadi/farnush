@@ -1,5 +1,0 @@
-- What are the 3 aims that you'll address in you MSc thesis? You have started on Aim 1, "predicting gene expression levels in blood from SNP data", but you need some preliminary idea of what the rest of the aims will look like. We have discussed several options here, I'd like you to see this more formalized. 
-
-- So far, one option for Aim 2 is comparing predictive models (e.g., elastic net and GPR). But I'd like to see results for this that you can explain, and you feel confident in. Results don't have to be finalized, but I'd we need to be certain that they are correct. 
-
-- For Aim 3, we discussed several options: tissue comparison, using prior knowledge. I'd like you to have formalized the steps of this Aim before we call the committee.  

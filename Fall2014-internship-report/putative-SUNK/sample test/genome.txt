@@ -1,0 +1,12 @@
+>chr1
+NNACGTNNGCCTNN
+>chr1_hap
+NACGTNNN
+>chrUn_38633
+GCCC
+>chr2
+ATTTNNNN
+>chr2_hap
+ATTTNNNNTCCC
+>chr2_hap1
+ATTT
