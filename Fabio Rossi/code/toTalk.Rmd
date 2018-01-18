@@ -1,6 +1,0 @@
-
-- FAIL
-- HIDATA
-- duplicated genes 
-- z transfomr for cor: does not affect
-- filtering invariant genes
